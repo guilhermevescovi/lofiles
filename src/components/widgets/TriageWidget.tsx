@@ -168,16 +168,6 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
 
   const groupedPRs = groupPRsByAssignment();
 
-  // Auto-expand all groups when filtering by user
-  React.useEffect(() => {
-    if (selectedUser) {
-      const allGroupNames = groupedPRs.map(([groupName]) => groupName);
-      setExpandedGroups(new Set(allGroupNames));
-    } else {
-      // Reset to default when no filter
-      setExpandedGroups(new Set(['Directly Assigned']));
-    }
-  }, [selectedUser, groupedPRs]);
 
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>

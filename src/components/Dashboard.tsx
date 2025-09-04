@@ -253,15 +253,6 @@ const Dashboard: React.FC = () => {
                   order: 1
                 }}
               >
-              <IconButton 
-                size="small"
-                color="inherit" 
-                onClick={handleRefresh} 
-                title="Refresh"
-              >
-                <Refresh fontSize="small" />
-              </IconButton>
-              
               {user && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, justifyContent: 'flex-end', mr: 1 }}>
                   <Typography 
@@ -276,7 +267,7 @@ const Dashboard: React.FC = () => {
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    {(user.name || user.login).split(' ')[0]}
+                    {user.login}
                   </Typography>
                   <Avatar 
                     src={user.avatarUrl} 
