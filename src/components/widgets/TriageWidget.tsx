@@ -58,6 +58,14 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
     }
   };
 
+  const isCriticalPR = (pr: PullRequest) => {
+    const daysSinceCreated = (Date.now() - new Date(pr.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+    const daysSinceUpdated = (Date.now() - new Date(pr.updatedAt).getTime()) / (1000 * 60 * 60 * 24);
+    
+    // Critical if PR is older than 7 days and hasn't been updated in 3+ days
+    return daysSinceCreated > 7 && daysSinceUpdated > 3;
+  };
+
   const getStatusIcon = (pr: PullRequest) => {
     const latestCommit = pr.commits.nodes[0];
     if (!latestCommit?.commit.statusCheckRollup) return <Schedule />;
@@ -303,7 +311,10 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                             px: 2,
                             '&:hover': { backgroundColor: 'action.hover' },
                             borderRadius: 1,
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            backgroundColor: isCriticalPR(pr) ? 'rgba(255, 20, 147, 0.2)' : 'transparent',
+                            border: isCriticalPR(pr) ? '2px solid #ff1493' : 'none',
+                            borderLeft: isCriticalPR(pr) ? '4px solid #ff1493' : 'none'
                           }}
                           onClick={() => openInNewTab(pr.url)}
                         >
@@ -320,6 +331,23 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                                 {pr.isDraft && (
                                   <Chip label="Draft" size="small" variant="outlined" />
                                 )}
+                                
+                                {isCriticalPR(pr) && (
+                                  <Chip 
+                                    icon={<PriorityHigh />}
+                                    label="GETTING OLD" 
+                                    size="small" 
+                                    sx={{
+                                      backgroundColor: '#ff1493',
+                                      color: '#ffffff',
+                                      fontWeight: 700,
+                                      fontSize: '0.6rem',
+                                      '& .MuiChip-icon': {
+                                        color: '#ffffff'
+                                      }
+                                    }}
+                                  />
+                                )}
                               </Box>
                             }
                             secondary={
@@ -327,6 +355,11 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                                 <Typography variant="body2" component="span" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                                   {pr.repository.nameWithOwner} • by {pr.author.login} • 
                                   Updated {formatDistanceToNow(new Date(pr.updatedAt), { addSuffix: true })}
+                                  {isCriticalPR(pr) && (
+                                    <span style={{ color: '#ff1493', fontWeight: 600 }}>
+                                      {' • Waiting '}{formatDistanceToNow(new Date(pr.createdAt), { addSuffix: false })}
+                                    </span>
+                                  )}
                                 </Typography>
                                 
                                 <Box display="flex" alignItems="center" gap={1}>
