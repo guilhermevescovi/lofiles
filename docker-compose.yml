@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Pass GitHub Personal Access Token for automatic authentication
+        # React will only inline vars prefixed with REACT_APP_
+        REACT_APP_GITHUB_TOKEN: ${REACT_APP_GITHUB_TOKEN}
+    image: github-workday-dashboard:latest
+    ports:
+      - "${APP_PORT:-3003}:80"
+    environment:
+      # Runtime envs won't affect CRA bundle; listed here for clarity if needed later
+      - NODE_ENV=production
+

@@ -69,7 +69,9 @@ const Dashboard: React.FC = () => {
   
   const { data, loading, error, refetch } = useQuery<WorkdayDashboardData>(GET_WORKDAY_DASHBOARD, {
     pollInterval: 300000, // Auto-refresh every 5 minutes
-    errorPolicy: 'all'
+    errorPolicy: 'all',
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: 'cache-and-network' // Always try to fetch fresh data
   });
 
   const pendingByAuthor = React.useMemo(() => {
@@ -135,6 +137,9 @@ const Dashboard: React.FC = () => {
             <OnRadarWidget 
               involvedPRs={data?.involvedPRs?.nodes || []}
               currentUser={data?.viewer?.login || ''}
+              isLoading={loading}
+              error={error}
+              onRetry={handleRefresh}
             />
           </Box>
 

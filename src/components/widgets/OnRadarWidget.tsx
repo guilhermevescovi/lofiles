@@ -11,7 +11,9 @@ import {
   Box,
   IconButton,
   Divider,
-  Alert
+  Alert,
+  CircularProgress,
+  Button
 } from '@mui/material';
 import { 
   Radar, 
@@ -30,10 +32,37 @@ import { useFocus } from '../../context/FocusContext';
 interface OnRadarWidgetProps {
   involvedPRs: PullRequest[];
   currentUser: string;
+  isLoading?: boolean;
+  error?: Error | null;
+  onRetry?: () => void;
 }
 
-const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser }) => {
+const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser, isLoading, error, onRetry }) => {
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
+  
+  // Validate and filter out invalid PRs
+  const validPRs = React.useMemo(() => {
+    if (!Array.isArray(involvedPRs)) {
+      console.warn('OnRadarWidget: involvedPRs is not an array:', involvedPRs);
+      return [];
+    }
+    const valid = involvedPRs.filter(pr => 
+      pr && 
+      pr.id && 
+      pr.title && 
+      pr.url && 
+      pr.author && 
+      pr.author.login &&
+      pr.repository &&
+      pr.repository.nameWithOwner
+    );
+    
+    if (involvedPRs.length > 0 && valid.length === 0) {
+      console.warn('OnRadarWidget: All PRs were filtered out as invalid:', involvedPRs);
+    }
+    
+    return valid;
+  }, [involvedPRs]);
   const getMyLastReviewDate = (pr: PullRequest) => {
     const myReviews = pr.reviews.nodes.filter(review => review.author.login === currentUser);
     return myReviews.length > 0 ? myReviews[myReviews.length - 1].submittedAt : null;
@@ -93,7 +122,7 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser 
   };
 
   // Sort PRs: ones with new commits since my review first, then by update date
-  const sortedPRs = [...involvedPRs].sort((a, b) => {
+  const sortedPRs = [...validPRs].sort((a, b) => {
     const aHasNew = hasNewCommitsSinceMyReview(a);
     const bHasNew = hasNewCommitsSinceMyReview(b);
     
@@ -103,7 +132,71 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser 
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
   });
 
-  const prsWithNewCommits = involvedPRs.filter(hasNewCommitsSinceMyReview);
+  const prsWithNewCommits = validPRs.filter(hasNewCommitsSinceMyReview);
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box display="flex" alignItems="center" mb={2}>
+          <Typography 
+            variant="h6" 
+            component="h2"
+            sx={{
+              fontFamily: '"Press Start 2P", "Courier New", monospace',
+              fontSize: '18px',
+              textShadow: '2px 2px 0px #4CA1A3',
+              color: '#ffffff',
+              letterSpacing: '1px'
+            }}
+          >
+            On My Radar
+          </Typography>
+        </Box>
+        
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress size={40} />
+        </Box>
+      </Paper>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box display="flex" alignItems="center" mb={2}>
+          <Typography 
+            variant="h6" 
+            component="h2"
+            sx={{
+              fontFamily: '"Press Start 2P", "Courier New", monospace',
+              fontSize: '18px',
+              textShadow: '2px 2px 0px #4CA1A3',
+              color: '#ffffff',
+              letterSpacing: '1px'
+            }}
+          >
+            On My Radar
+          </Typography>
+        </Box>
+        
+        <Alert 
+          severity="error" 
+          sx={{ mb: 2 }}
+          action={
+            onRetry && (
+              <Button color="inherit" size="small" onClick={onRetry}>
+                Retry
+              </Button>
+            )
+          }
+        >
+          Failed to load radar data. {error.message}
+        </Alert>
+      </Paper>
+    );
+  }
 
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -145,7 +238,7 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser 
         </Alert>
       )}
 
-      {involvedPRs.length === 0 ? (
+      {validPRs.length === 0 ? (
         <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Typography variant="body2" color="text.secondary">
             👀 No PRs you're involved in
