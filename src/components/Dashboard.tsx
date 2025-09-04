@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Container,
   Grid,
@@ -65,6 +65,7 @@ const glitchAfter = keyframes`
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
   
   const { data, loading, error, refetch } = useQuery<WorkdayDashboardData>(GET_WORKDAY_DASHBOARD, {
     pollInterval: 300000, // Auto-refresh every 5 minutes
@@ -124,6 +125,8 @@ const Dashboard: React.FC = () => {
             <TriageWidget 
               prsToReview={data?.prsToReview?.nodes || []}
               mentions={[]} // We'll implement mentions later
+              selectedUser={selectedUser}
+              onClearFilter={() => setSelectedUser(null)}
             />
           </Box>
 
@@ -313,14 +316,32 @@ const Dashboard: React.FC = () => {
                     <List dense disablePadding>
                       {pendingByAuthor.map(({ login, avatarUrl, count }, index) => (
                         <React.Fragment key={login}>
-                          <ListItem sx={{ py: 0.5 }}>
+                          <ListItem 
+                            sx={{ 
+                              py: 0.5,
+                              cursor: 'pointer',
+                              '&:hover': { 
+                                backgroundColor: 'rgba(76, 161, 163, 0.1)',
+                                borderRadius: 1
+                              }
+                            }}
+                            onClick={() => setSelectedUser(login)}
+                          >
                             <ListItemAvatar>
                               <Avatar src={avatarUrl} alt={login} sx={{ width: 28, height: 28 }} />
                             </ListItemAvatar>
                             <ListItemText
                               primary={
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                  <Typography variant="body2" sx={{ mr: 2 }}>
+                                  <Typography 
+                                    variant="body2" 
+                                    sx={{ 
+                                      mr: 2,
+                                      '&:hover': { 
+                                        color: '#4CA1A3'
+                                      }
+                                    }}
+                                  >
                                     {login}
                                   </Typography>
                                   <Typography variant="body2" color="text.secondary">

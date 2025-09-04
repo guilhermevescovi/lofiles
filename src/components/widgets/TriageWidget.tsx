@@ -24,7 +24,8 @@ import {
   OpenInNew,
   ExpandMore,
   Star,
-  StarBorder
+  StarBorder,
+  Clear
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { PullRequest } from '../../types/github';
@@ -34,9 +35,11 @@ import { useFocus } from '../../context/FocusContext';
 interface TriageWidgetProps {
   prsToReview: PullRequest[];
   mentions: any[]; // We'll type this properly later
+  selectedUser?: string | null;
+  onClearFilter?: () => void;
 }
 
-const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) => {
+const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, selectedUser, onClearFilter }) => {
   // Get current user from the Dashboard component
   const { user } = useAuth();
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
@@ -84,11 +87,18 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
     }
   };
 
+  // Filter PRs by selected user if any
+  const filteredPRs = React.useMemo(() => {
+    if (!selectedUser) return prsToReview;
+    
+    return prsToReview.filter(pr => pr.author.login === selectedUser);
+  }, [prsToReview, selectedUser]);
+
   // Group PRs by review assignment type and sort by last updated
   const groupPRsByAssignment = () => {
     const groups: { [key: string]: { prs: PullRequest[], isDirect: boolean } } = {};
     
-    prsToReview.forEach(pr => {
+    filteredPRs.forEach(pr => {
       let isDirectlyAssigned = false;
       const assignmentTypes = new Set<string>();
       
@@ -158,6 +168,17 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
 
   const groupedPRs = groupPRsByAssignment();
 
+  // Auto-expand all groups when filtering by user
+  React.useEffect(() => {
+    if (selectedUser) {
+      const allGroupNames = groupedPRs.map(([groupName]) => groupName);
+      setExpandedGroups(new Set(allGroupNames));
+    } else {
+      // Reset to default when no filter
+      setExpandedGroups(new Set(['Directly Assigned']));
+    }
+  }, [selectedUser, groupedPRs]);
+
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box display="flex" alignItems="center" mb={2}>
@@ -176,14 +197,51 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
         </Typography>
       </Box>
       
+      {selectedUser && onClearFilter && (
+        <Box 
+          display="flex" 
+          alignItems="center" 
+          justifyContent="space-between" 
+          mb={2}
+          sx={{
+            backgroundColor: 'rgba(76, 161, 163, 0.15)',
+            border: '1px solid rgba(76, 161, 163, 0.3)',
+            borderRadius: 1,
+            px: 2,
+            py: 1
+          }}
+        >
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: '#4CA1A3',
+              fontWeight: 600
+            }}
+          >
+            Filtered by: {selectedUser}
+          </Typography>
+          <IconButton 
+            size="small" 
+            onClick={onClearFilter}
+            title="Clear filter"
+            sx={{ 
+              color: '#4CA1A3',
+              '&:hover': { backgroundColor: 'rgba(76, 161, 163, 0.2)' }
+            }}
+          >
+            <Clear fontSize="small" />
+          </IconButton>
+        </Box>
+      )}
+      
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Pull requests waiting for your review
       </Typography>
 
-      {prsToReview.length === 0 ? (
+      {filteredPRs.length === 0 ? (
         <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Typography variant="body2" color="text.secondary">
-            🎉 No PRs waiting for your review!
+            {selectedUser ? `🎯 No PRs from ${selectedUser} waiting for your review!` : '🎉 No PRs waiting for your review!'}
           </Typography>
         </Box>
       ) : (
