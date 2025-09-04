@@ -4,20 +4,57 @@
 /node_modules
 /.pnp
 .pnp.js
+node_modules/
 
 # testing
 /coverage
 
 # production
 /build
+/dist
 
-# misc
-.DS_Store
+# environment variables
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# misc
+.DS_Store
+.DS_Store?
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
