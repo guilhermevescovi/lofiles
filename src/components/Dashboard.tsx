@@ -19,6 +19,7 @@ import {
   Divider
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
+import { keyframes } from '@mui/system';
 import { Refresh, Logout } from '@mui/icons-material';
 import { useQuery } from '@apollo/client';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +30,38 @@ import InFlightWidget from './widgets/InFlightWidget';
 import OnRadarWidget from './widgets/OnRadarWidget';
 import FocusWidget from './widgets/FocusWidget';
 import LofiPlayer from './LofiPlayer';
+
+// Glitch keyframes for the Lo-files title
+const glitchMain = keyframes`
+  0% { transform: none; color: #ffffff; }
+  2% { transform: translate(1px, -1px) skew(0.2deg); color: #ff69b4; }
+  4% { transform: translate(-1px, 1px) skew(-0.2deg); color: #ffffff; }
+  6% { transform: none; color: #ff69b4; }
+  8% { transform: translate(1px, 0); color: #ffffff; }
+  10% { transform: none; color: #ff69b4; }
+  12% { transform: translate(-1px, 0); color: #ffffff; }
+  14% { transform: none; color: #ff69b4; }
+  16% { transform: none; color: #ffffff; }
+  100% { transform: none; color: #ffffff; }
+`;
+
+const glitchBefore = keyframes`
+  0% { clip-path: inset(0 0 0 0); transform: translate(-1px, 0); opacity: 0.7; }
+  5% { clip-path: inset(10% 0 85% 0); transform: translate(-2px, -1px); }
+  10% { clip-path: inset(80% 0 5% 0); transform: translate(-1px, 1px); }
+  15% { clip-path: inset(40% 0 40% 0); transform: translate(-3px, 0); }
+  20% { clip-path: inset(0 0 0 0); transform: translate(0, 0); opacity: 0.4; }
+  100% { clip-path: inset(0 0 0 0); transform: none; opacity: 0.4; }
+`;
+
+const glitchAfter = keyframes`
+  0% { clip-path: inset(0 0 0 0); transform: translate(1px, 0); opacity: 0.7; }
+  5% { clip-path: inset(85% 0 10% 0); transform: translate(2px, 1px); }
+  10% { clip-path: inset(5% 0 80% 0); transform: translate(1px, -1px); }
+  15% { clip-path: inset(40% 0 40% 0); transform: translate(3px, 0); }
+  20% { clip-path: inset(0 0 0 0); transform: translate(0, 0); opacity: 0.4; }
+  100% { clip-path: inset(0 0 0 0); transform: none; opacity: 0.4; }
+`;
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -156,6 +189,48 @@ const Dashboard: React.FC = () => {
                 }}
               />
               
+              {/* Pixel title above user card */}
+              <Box sx={{ alignSelf: 'flex-end', order: 0, mb: 1, width: '100%' }}>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    fontFamily: '"Press Start 2P", "Courier New", monospace',
+                    fontSize: '28px',
+                    textShadow: '3px 3px 0px #4CA1A3',
+                    color: '#ffffff',
+                    letterSpacing: '0.5px',
+                    lineHeight: 1.2,
+                    whiteSpace: 'nowrap',
+                    textAlign: 'right',
+                    position: 'relative',
+                    display: 'inline-block',
+                    animation: `${glitchMain} 2.2s infinite`,
+                    '&::before': {
+                      content: '"Lo-files"',
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      color: '#ffffff',
+                      textShadow: '3px 0 rgb(204, 0, 255)',
+                      animation: `${glitchBefore} 2s infinite`,
+                      pointerEvents: 'none'
+                    },
+                    '&::after': {
+                      content: '"Lo-files"',
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      color: '#ffffff',
+                      textShadow: '-3px 0 #00fff9',
+                      animation: `${glitchAfter} 2.4s infinite`,
+                      pointerEvents: 'none'
+                    }
+                  }}
+                >
+                  Lo-files
+                </Typography>
+              </Box>
+
               {/* User Info Bar */}
               <Box 
                 sx={{ 

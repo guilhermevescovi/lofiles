@@ -245,7 +245,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
                   </Box>
                 </AccordionSummary>
                 
-                <AccordionDetails sx={{ p: 0 }}>
+                <AccordionDetails sx={{ p: 0, backgroundColor: 'rgba(76, 161, 163, 0.15)' }}>
                   <List dense>
                     {prs.map((pr, index) => (
                       <React.Fragment key={pr.id}>
