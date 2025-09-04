@@ -21,10 +21,13 @@ import {
   Error, 
   Schedule, 
   OpenInNew,
-  Person
+  Person,
+  Star,
+  StarBorder
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { PullRequest, Issue } from '../../types/github';
+import { useFocus } from '../../context/FocusContext';
 
 interface InFlightWidgetProps {
   myOpenPRs: PullRequest[];
@@ -33,6 +36,7 @@ interface InFlightWidgetProps {
 
 const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssues }) => {
   const [tabValue, setTabValue] = React.useState(0);
+  const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
 
   const getPRStatus = (pr: PullRequest) => {
     if (pr.isDraft) return 'Draft';
@@ -78,12 +82,33 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
     setTabValue(newValue);
   };
 
+  const handleFocusToggle = (pr: PullRequest, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isInFocus(pr.url)) {
+      const focusItem = getFocusItem(pr.url);
+      if (focusItem) {
+        removeFromFocus(focusItem.id);
+      }
+    } else {
+      addToFocus(pr);
+    }
+  };
+
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box display="flex" alignItems="center" mb={2}>
-        <Assignment color="primary" sx={{ mr: 1 }} />
-        <Typography variant="h6" component="h2">
-          In-Flight: My Active Workstream
+        <Typography 
+          variant="h6" 
+          component="h2"
+          sx={{
+            fontFamily: '"Press Start 2P", "Courier New", monospace',
+            fontSize: '18px',
+            textShadow: '2px 2px 0px #4CA1A3',
+            color: '#ffffff',
+            letterSpacing: '1px'
+          }}
+        >
+          My Stuff
         </Typography>
       </Box>
       
@@ -169,12 +194,27 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
                         }
                       />
                       
-                      <IconButton size="small" onClick={(e) => {
-                        e.stopPropagation();
-                        openInNewTab(pr.url);
-                      }}>
-                        <OpenInNew fontSize="small" />
-                      </IconButton>
+                      <Box display="flex" gap={0.5}>
+                        <IconButton 
+                          size="small" 
+                          onClick={(e) => handleFocusToggle(pr, e)}
+                          color={isInFocus(pr.url) ? "warning" : "default"}
+                          title={isInFocus(pr.url) ? "Remove from focus" : "Add to focus"}
+                        >
+                          {isInFocus(pr.url) ? (
+                            <Star fontSize="small" />
+                          ) : (
+                            <StarBorder fontSize="small" />
+                          )}
+                        </IconButton>
+                        
+                        <IconButton size="small" onClick={(e) => {
+                          e.stopPropagation();
+                          openInNewTab(pr.url);
+                        }}>
+                          <OpenInNew fontSize="small" />
+                        </IconButton>
+                      </Box>
                     </ListItem>
                     
                     {index < myOpenPRs.length - 1 && <Divider variant="inset" />}

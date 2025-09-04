@@ -22,11 +22,14 @@ import {
   Error, 
   Schedule, 
   OpenInNew,
-  ExpandMore 
+  ExpandMore,
+  Star,
+  StarBorder
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { PullRequest } from '../../types/github';
 import { useAuth } from '../../context/AuthContext';
+import { useFocus } from '../../context/FocusContext';
 
 interface TriageWidgetProps {
   prsToReview: PullRequest[];
@@ -36,7 +39,8 @@ interface TriageWidgetProps {
 const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) => {
   // Get current user from the Dashboard component
   const { user } = useAuth();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['🎯 Directly Assigned']));
+  const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Directly Assigned']));
 
   const getStatusColor = (pr: PullRequest) => {
     const latestCommit = pr.commits.nodes[0];
@@ -68,6 +72,18 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleFocusToggle = (pr: PullRequest, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isInFocus(pr.url)) {
+      const focusItem = getFocusItem(pr.url);
+      if (focusItem) {
+        removeFromFocus(focusItem.id);
+      }
+    } else {
+      addToFocus(pr);
+    }
+  };
+
   // Group PRs by review assignment type and sort by last updated
   const groupPRsByAssignment = () => {
     const groups: { [key: string]: { prs: PullRequest[], isDirect: boolean } } = {};
@@ -84,23 +100,23 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
         // Check if it's a direct user assignment to the current user
         if ('login' in reviewer && reviewer.login && reviewer.login === user?.login) {
           isDirectlyAssigned = true;
-          assignmentTypes.add('🎯 Directly Assigned');
+          assignmentTypes.add('Directly Assigned');
         }
         // Check if it's a team assignment
         else if ('name' in reviewer && reviewer.name) {
-          assignmentTypes.add(`👥 ${reviewer.name}`);
+          assignmentTypes.add(reviewer.name);
         }
       });
       
       // If no review requests, categorize as "No Assignment"
       if (assignmentTypes.size === 0) {
-        assignmentTypes.add('❓ No Assignment');
+        assignmentTypes.add('No Assignment');
       }
       
       // Add PR to each relevant group
       assignmentTypes.forEach(groupName => {
         if (!groups[groupName]) {
-          groups[groupName] = { prs: [], isDirect: groupName.includes('🎯') };
+          groups[groupName] = { prs: [], isDirect: groupName.includes('Directly Assigned') };
         }
         groups[groupName].prs.push(pr);
       });
@@ -145,9 +161,18 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box display="flex" alignItems="center" mb={2}>
-        <PriorityHigh color="error" sx={{ mr: 1 }} />
-        <Typography variant="h6" component="h2">
-          Triage: What Needs My Immediate Attention?
+        <Typography 
+          variant="h6" 
+          component="h2"
+          sx={{
+            fontFamily: '"Press Start 2P", "Courier New", monospace',
+            fontSize: '18px',
+            textShadow: '2px 2px 0px #4CA1A3',
+            color: '#ffffff',
+            letterSpacing: '1px'
+          }}
+        >
+          Review Requests
         </Typography>
       </Box>
       
@@ -282,12 +307,27 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
                             }
                           />
                           
-                          <IconButton size="small" onClick={(e) => {
-                            e.stopPropagation();
-                            openInNewTab(pr.url);
-                          }}>
-                            <OpenInNew fontSize="small" />
-                          </IconButton>
+                          <Box display="flex" gap={0.5}>
+                            <IconButton 
+                              size="small" 
+                              onClick={(e) => handleFocusToggle(pr, e)}
+                              color={isInFocus(pr.url) ? "warning" : "default"}
+                              title={isInFocus(pr.url) ? "Remove from focus" : "Add to focus"}
+                            >
+                              {isInFocus(pr.url) ? (
+                                <Star fontSize="small" />
+                              ) : (
+                                <StarBorder fontSize="small" />
+                              )}
+                            </IconButton>
+                            
+                            <IconButton size="small" onClick={(e) => {
+                              e.stopPropagation();
+                              openInNewTab(pr.url);
+                            }}>
+                              <OpenInNew fontSize="small" />
+                            </IconButton>
+                          </Box>
                         </ListItem>
                         
                         {index < prs.length - 1 && <Divider variant="inset" />}

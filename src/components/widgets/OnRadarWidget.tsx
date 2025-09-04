@@ -19,10 +19,13 @@ import {
   Error, 
   Schedule, 
   OpenInNew,
-  NewReleases
+  NewReleases,
+  Star,
+  StarBorder
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { PullRequest } from '../../types/github';
+import { useFocus } from '../../context/FocusContext';
 
 interface OnRadarWidgetProps {
   involvedPRs: PullRequest[];
@@ -30,6 +33,7 @@ interface OnRadarWidgetProps {
 }
 
 const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser }) => {
+  const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
   const getMyLastReviewDate = (pr: PullRequest) => {
     const myReviews = pr.reviews.nodes.filter(review => review.author.login === currentUser);
     return myReviews.length > 0 ? myReviews[myReviews.length - 1].submittedAt : null;
@@ -76,6 +80,18 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser 
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleFocusToggle = (pr: PullRequest, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isInFocus(pr.url)) {
+      const focusItem = getFocusItem(pr.url);
+      if (focusItem) {
+        removeFromFocus(focusItem.id);
+      }
+    } else {
+      addToFocus(pr);
+    }
+  };
+
   // Sort PRs: ones with new commits since my review first, then by update date
   const sortedPRs = [...involvedPRs].sort((a, b) => {
     const aHasNew = hasNewCommitsSinceMyReview(a);
@@ -92,9 +108,18 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser 
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box display="flex" alignItems="center" mb={2}>
-        <Radar color="info" sx={{ mr: 1 }} />
-        <Typography variant="h6" component="h2">
-          On My Radar: Keeping Context
+        <Typography 
+          variant="h6" 
+          component="h2"
+          sx={{
+            fontFamily: '"Press Start 2P", "Courier New", monospace',
+            fontSize: '18px',
+            textShadow: '2px 2px 0px #4CA1A3',
+            color: '#ffffff',
+            letterSpacing: '1px'
+          }}
+        >
+          On My Radar
         </Typography>
       </Box>
       
@@ -219,12 +244,27 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser 
                     }
                   />
                   
-                  <IconButton size="small" onClick={(e) => {
-                    e.stopPropagation();
-                    openInNewTab(pr.url);
-                  }}>
-                    <OpenInNew fontSize="small" />
-                  </IconButton>
+                  <Box display="flex" gap={0.5}>
+                    <IconButton 
+                      size="small" 
+                      onClick={(e) => handleFocusToggle(pr, e)}
+                      color={isInFocus(pr.url) ? "warning" : "default"}
+                      title={isInFocus(pr.url) ? "Remove from focus" : "Add to focus"}
+                    >
+                      {isInFocus(pr.url) ? (
+                        <Star fontSize="small" />
+                      ) : (
+                        <StarBorder fontSize="small" />
+                      )}
+                    </IconButton>
+                    
+                    <IconButton size="small" onClick={(e) => {
+                      e.stopPropagation();
+                      openInNewTab(pr.url);
+                    }}>
+                      <OpenInNew fontSize="small" />
+                    </IconButton>
+                  </Box>
                 </ListItem>
                 
                 {index < sortedPRs.length - 1 && <Divider variant="inset" />}

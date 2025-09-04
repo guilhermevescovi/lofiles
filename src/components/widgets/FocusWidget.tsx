@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Paper,
   Typography,
@@ -27,30 +27,14 @@ import {
   Assignment
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
-import { FocusItem } from '../../types/github';
+import { useFocus } from '../../context/FocusContext';
+import { PullRequest } from '../../types/github';
 
 const FocusWidget: React.FC = () => {
-  const [focusItems, setFocusItems] = useState<FocusItem[]>([]);
+  const { focusItems, addToFocus, removeFromFocus } = useFocus();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newItemUrl, setNewItemUrl] = useState('');
   const [newItemTitle, setNewItemTitle] = useState('');
-
-  // Load focus items from localStorage on component mount
-  useEffect(() => {
-    const stored = localStorage.getItem('github_focus_items');
-    if (stored) {
-      try {
-        setFocusItems(JSON.parse(stored));
-      } catch (error) {
-        console.error('Error loading focus items:', error);
-      }
-    }
-  }, []);
-
-  // Save focus items to localStorage whenever the list changes
-  useEffect(() => {
-    localStorage.setItem('github_focus_items', JSON.stringify(focusItems));
-  }, [focusItems]);
 
   const parseGitHubUrl = (url: string): { type: 'pr' | 'issue'; repository: string; number: number } | null => {
     // Match GitHub PR or issue URLs
@@ -73,23 +57,35 @@ const FocusWidget: React.FC = () => {
       return;
     }
     
-    const newItem: FocusItem = {
-      id: `focus-${Date.now()}`,
+    // Create a mock PR object for the context function
+    const mockPR: PullRequest = {
+      id: `manual-${Date.now()}`,
       title: newItemTitle.trim() || `${parsed.type.toUpperCase()} #${parsed.number}`,
       url: newItemUrl.trim(),
-      type: parsed.type,
-      repository: parsed.repository,
-      addedAt: new Date().toISOString()
+      number: parsed.number,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      mergeable: 'UNKNOWN',
+      isDraft: false,
+      repository: {
+        nameWithOwner: parsed.repository,
+        url: `https://github.com/${parsed.repository}`
+      },
+      author: {
+        login: 'unknown',
+        avatarUrl: 'https://github.com/github.png'
+      },
+      commits: { nodes: [] },
+      reviews: { nodes: [] },
+      reviewRequests: { nodes: [] },
+      comments: { nodes: [] },
+      labels: { nodes: [] }
     };
     
-    setFocusItems(prev => [newItem, ...prev.slice(0, 4)]); // Keep max 5 items
+    addToFocus(mockPR);
     setNewItemUrl('');
     setNewItemTitle('');
     setIsAddDialogOpen(false);
-  };
-
-  const removeFocusItem = (id: string) => {
-    setFocusItems(prev => prev.filter(item => item.id !== id));
   };
 
   const openInNewTab = (url: string) => {
@@ -100,12 +96,19 @@ const FocusWidget: React.FC = () => {
     <>
       <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-          <Box display="flex" alignItems="center">
-            <Star color="warning" sx={{ mr: 1 }} />
-            <Typography variant="h6" component="h2">
-              Focus for Today
-            </Typography>
-          </Box>
+          <Typography 
+            variant="h6" 
+            component="h2"
+            sx={{
+              fontFamily: '"Press Start 2P", "Courier New", monospace',
+              fontSize: '18px',
+              textShadow: '2px 2px 0px #4CA1A3',
+              color: '#ffffff',
+              letterSpacing: '1px'
+            }}
+          >
+            Focus for Today
+          </Typography>
           
           <IconButton 
             size="small" 
@@ -200,7 +203,7 @@ const FocusWidget: React.FC = () => {
                       size="small" 
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeFocusItem(item.id);
+                        removeFromFocus(item.id);
                       }}
                       color="error"
                     >

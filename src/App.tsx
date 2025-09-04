@@ -2,6 +2,7 @@ import React from 'react';
 import { ApolloProvider } from '@apollo/client';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { FocusProvider } from './context/FocusContext';
 import { apolloClient } from './apollo/client';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
@@ -144,7 +145,9 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthProvider>
-          <AppContent />
+          <FocusProvider>
+            <AppContent />
+          </FocusProvider>
         </AuthProvider>
       </ThemeProvider>
     </ApolloProvider>
