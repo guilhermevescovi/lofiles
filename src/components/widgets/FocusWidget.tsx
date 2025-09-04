@@ -126,7 +126,8 @@ const FocusWidget: React.FC = () => {
         {focusItems.length === 0 ? (
           <Box textAlign="center" py={4}>
             <Typography variant="body2" color="text.secondary">
-              🎯 No focus items yet.
+              No focus items yet
+              ⭐ Star some PRs to keep track of them
             </Typography>
             <Button 
               size="small" 
@@ -134,7 +135,7 @@ const FocusWidget: React.FC = () => {
               onClick={() => setIsAddDialogOpen(true)}
               sx={{ mt: 1 }}
             >
-              Add your first item
+              Or add your first item
             </Button>
           </Box>
         ) : (

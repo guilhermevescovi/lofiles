@@ -179,7 +179,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
 
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box display="flex" alignItems="center" mb={2}>
+      <Box display="flex" alignItems="center" gap={1} mb={2}>
         <Typography 
           variant="h6" 
           component="h2"
@@ -193,6 +193,17 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
         >
           Review Requests
         </Typography>
+        <Box 
+          component="img" 
+          src="/assets/internet-running.gif" 
+          alt="Internet Running"
+          sx={{
+            height: 'auto',
+            maxHeight: '48px',
+            objectFit: 'contain',
+            borderRadius: '4px'
+          }}
+        />
       </Box>
       
       {selectedUser && onClearFilter && (
@@ -257,8 +268,8 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                   '&:before': { display: 'none' },
                   boxShadow: isDirect ? 3 : 1,
                   borderRadius: '8px !important',
-                  border: isDirect ? '2px solid #4caf50' : 'none',
-                  backgroundColor: isDirect ? 'rgba(76, 175, 80, 0.05)' : 'background.paper',
+                  border: isDirect ? '2px solid #388e3c' : 'none',
+                  backgroundColor: isDirect ? 'rgba(56, 142, 60, 0.06)' : 'background.paper',
                   '&.Mui-expanded': { margin: '0 0 8px 0' }
                 }}
               >
@@ -269,7 +280,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                     '&.Mui-expanded': { minHeight: 48 },
                     px: 2,
                     borderRadius: '8px',
-                    backgroundColor: isDirect ? 'rgba(76, 175, 80, 0.1)' : 'transparent'
+                    backgroundColor: isDirect ? 'rgba(56, 142, 60, 0.12)' : 'transparent'
                   }}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
@@ -277,7 +288,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                       variant="subtitle1" 
                       sx={{ 
                         fontWeight: isDirect ? 700 : 600,
-                        color: isDirect ? '#2e7d32' : 'text.primary'
+                        color: isDirect ? '#388e3c' : 'text.primary'
                       }}
                     >
                       {groupName}
@@ -294,8 +305,13 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                       <Chip 
                         label="HIGH PRIORITY" 
                         size="small" 
-                        color="success"
-                        sx={{ ml: 1, fontWeight: 600, fontSize: '0.6rem' }}
+                        sx={{ 
+                          ml: 1, 
+                          fontWeight: 600, 
+                          fontSize: '0.6rem',
+                          backgroundColor: '#388e3c',
+                          color: '#ffffff'
+                        }}
                       />
                     )}
                   </Box>
