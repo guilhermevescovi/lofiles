@@ -10,8 +10,15 @@ import {
   Box,
   Button,
   CircularProgress,
-  Alert
+  Alert,
+  Paper,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Divider
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { Refresh, Logout } from '@mui/icons-material';
 import { useQuery } from '@apollo/client';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +36,20 @@ const Dashboard: React.FC = () => {
     pollInterval: 300000, // Auto-refresh every 5 minutes
     errorPolicy: 'all'
   });
+
+  const pendingByAuthor = React.useMemo(() => {
+    const counts: Record<string, { login: string; avatarUrl?: string; count: number }> = {};
+    const prs = data?.prsToReview?.nodes || [];
+    prs.forEach(pr => {
+      const login = pr.author?.login || 'unknown';
+      const avatarUrl = pr.author?.avatarUrl;
+      if (!counts[login]) {
+        counts[login] = { login, avatarUrl, count: 0 };
+      }
+      counts[login].count += 1;
+    });
+    return Object.values(counts).sort((a, b) => b.count - a.count);
+  }, [data?.prsToReview?.nodes]);
 
   const handleRefresh = () => {
     refetch();
@@ -122,7 +143,7 @@ const Dashboard: React.FC = () => {
               {/* User Info Bar */}
               <Box 
                 sx={{ 
-                  backgroundColor: '#511281', 
+                  backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.4), 
                   border: '1px solid rgba(76, 161, 163, 0.2)',
                   borderRadius: '12px',
                   px: 1.5,
@@ -186,6 +207,45 @@ const Dashboard: React.FC = () => {
                 <Logout fontSize="small" />
               </IconButton>
               </Box>
+
+              {/* Pending Reviews Ranking */}
+              <Paper elevation={0} sx={{ mt: 2, width: '100%', order: 3, backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.4), border: '1px solid rgba(76, 161, 163, 0.2)', borderRadius: '12px', boxShadow: 'none' }}>
+                <Box sx={{ p: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                    Who disturbs my peace
+                  </Typography>
+                  {pendingByAuthor.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      No pending review requests.
+                    </Typography>
+                  ) : (
+                    <List dense disablePadding>
+                      {pendingByAuthor.map(({ login, avatarUrl, count }, index) => (
+                        <React.Fragment key={login}>
+                          <ListItem sx={{ py: 0.5 }}>
+                            <ListItemAvatar>
+                              <Avatar src={avatarUrl} alt={login} sx={{ width: 28, height: 28 }} />
+                            </ListItemAvatar>
+                            <ListItemText
+                              primary={
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                  <Typography variant="body2" sx={{ mr: 2 }}>
+                                    {login}
+                                  </Typography>
+                                  <Typography variant="body2" color="text.secondary">
+                                    {count}
+                                  </Typography>
+                                </Box>
+                              }
+                            />
+                          </ListItem>
+                          {index < pendingByAuthor.length - 1 && <Divider component="li" sx={{ opacity: 0.2 }} />}
+                        </React.Fragment>
+                      ))}
+                    </List>
+                  )}
+                </Box>
+              </Paper>
             </Box>
           </Box>
         </Box>
