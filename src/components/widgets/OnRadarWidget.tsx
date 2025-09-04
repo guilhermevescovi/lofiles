@@ -163,7 +163,7 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser 
                 <ListItem 
                   alignItems="flex-start"
                   sx={{ 
-                    px: 0,
+                    px: 2,
                     '&:hover': { backgroundColor: 'action.hover' },
                     borderRadius: 1,
                     cursor: 'pointer',

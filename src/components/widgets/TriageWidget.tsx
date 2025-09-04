@@ -313,7 +313,6 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                             borderRadius: 1,
                             cursor: 'pointer',
                             backgroundColor: isCriticalPR(pr) ? 'rgba(255, 20, 147, 0.2)' : 'transparent',
-                            border: isCriticalPR(pr) ? '2px solid #ff1493' : 'none',
                             borderLeft: isCriticalPR(pr) ? '4px solid #ff1493' : 'none'
                           }}
                           onClick={() => openInNewTab(pr.url)}

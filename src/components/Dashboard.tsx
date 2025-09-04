@@ -293,8 +293,65 @@ const Dashboard: React.FC = () => {
               </IconButton>
               </Box>
 
+              {/* Arcade Score Display */}
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  mt: 2, 
+                  width: '100%', 
+                  order: 3, 
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                  border: '2px solid #4CA1A3', 
+                  borderRadius: '8px', 
+                  boxShadow: 'none',
+                  p: 2
+                }}
+              >
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      fontFamily: '"Press Start 2P", "Courier New", monospace',
+                      fontSize: '10px',
+                      color: '#4CA1A3',
+                      letterSpacing: '1px',
+                      display: 'block',
+                      mb: 1
+                    }}
+                  >
+                    REVIEW SCORE
+                  </Typography>
+                  <Typography 
+                    variant="h4" 
+                    sx={{ 
+                      fontFamily: '"Press Start 2P", "Courier New", monospace',
+                      fontSize: '24px',
+                      color: '#00ff00',
+                      textShadow: '0 0 10px #00ff00',
+                      letterSpacing: '2px',
+                      lineHeight: 1,
+                      mb: 0.5
+                    }}
+                  >
+                    0000000
+                  </Typography>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      fontFamily: '"Press Start 2P", "Courier New", monospace',
+                      fontSize: '8px',
+                      color: '#4CA1A3',
+                      letterSpacing: '0.5px',
+                      opacity: 0.7
+                    }}
+                  >
+                    API COMING SOON
+                  </Typography>
+                </Box>
+              </Paper>
+
               {/* Pending Reviews Ranking */}
-              <Paper elevation={0} sx={{ mt: 2, width: '100%', order: 3, backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.4), border: '1px solid rgba(76, 161, 163, 0.2)', borderRadius: '12px', boxShadow: 'none' }}>
+              <Paper elevation={0} sx={{ mt: 2, width: '100%', order: 4, backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.4), border: '1px solid rgba(76, 161, 163, 0.2)', borderRadius: '12px', boxShadow: 'none' }}>
                 <Box sx={{ p: 1.5 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                     Who disturbs my peace
