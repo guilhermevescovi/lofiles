@@ -1,4 +1,4 @@
-# My GitHub Workday
+# lofiles-dashboard
 
 A single-pane-of-glass dashboard that cuts through the noise of GitHub notifications. It tells you exactly what needs your attention *right now*, what you're waiting on, and what you've recently been involved in, so you can start your day focused and productive.
 
@@ -47,7 +47,7 @@ A single-pane-of-glass dashboard that cuts through the noise of GitHub notificat
 1. **Clone and install:**
    ```bash
    git clone <repository-url>
-   cd github-workday-dashboard
+   cd lofiles-dashboard
    npm install
    ```
 

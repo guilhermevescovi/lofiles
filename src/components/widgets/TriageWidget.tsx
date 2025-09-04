@@ -276,12 +276,12 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
                             }
                             secondary={
                               <Box>
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography variant="body2" component="span" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                                   {pr.repository.nameWithOwner} • by {pr.author.login} • 
                                   Updated {formatDistanceToNow(new Date(pr.updatedAt), { addSuffix: true })}
                                 </Typography>
                                 
-                                <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+                                <Box display="flex" alignItems="center" gap={1}>
                                   <Chip
                                     icon={getStatusIcon(pr)}
                                     label={pr.commits.nodes[0]?.commit.statusCheckRollup?.state || 'Unknown'}
@@ -305,6 +305,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions }) =>
                                 </Box>
                               </Box>
                             }
+                            disableTypography
                           />
                           
                           <Box display="flex" gap={0.5}>

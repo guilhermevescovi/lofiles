@@ -170,7 +170,7 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
                         }
                         secondary={
                           <Box>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" component="span" color="text.secondary" sx={{ display: 'block' }}>
                               {pr.repository.nameWithOwner} • 
                               {formatDistanceToNow(new Date(pr.updatedAt), { addSuffix: true })}
                             </Typography>
@@ -192,6 +192,7 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
                             </Box>
                           </Box>
                         }
+                        disableTypography
                       />
                       
                       <Box display="flex" gap={0.5}>
@@ -266,7 +267,7 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
                         }
                         secondary={
                           <Box>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" component="span" color="text.secondary" sx={{ display: 'block' }}>
                               {issue.repository.nameWithOwner} • by {issue.author.login} •
                               {formatDistanceToNow(new Date(issue.createdAt), { addSuffix: true })}
                             </Typography>
@@ -293,6 +294,7 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
                             </Box>
                           </Box>
                         }
+                        disableTypography
                       />
                       
                       <IconButton size="small" onClick={(e) => {

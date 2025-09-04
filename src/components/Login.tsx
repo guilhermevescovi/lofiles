@@ -12,25 +12,24 @@ import { GitHub } from '@mui/icons-material';
 
 const Login: React.FC = () => {
   const handleGitHubLogin = () => {
-    // For now, we'll simulate the OAuth flow
-    // In a real app, you'd need a backend to handle the OAuth callback
-    // const authUrl = getGitHubAuthURL(); // This would be used for real OAuth
-    
-    // For demonstration purposes, we'll show an alert with instructions
-    alert(`
-      To complete the OAuth setup:
-      
-      1. Create a GitHub OAuth App at https://github.com/settings/applications/new
-      2. Set Authorization callback URL to: http://localhost:3000/callback  
-      3. Copy the Client ID to a .env file as REACT_APP_GITHUB_CLIENT_ID
-      4. For this demo, you can manually add a token:
-         - Go to GitHub Settings > Developer settings > Personal access tokens
-         - Generate a token with 'repo' and 'read:user' scopes
-         - We'll use localStorage for this demo
-    `);
-    
-    // For demo purposes, let's prompt for a token
-    const token = prompt('Enter your GitHub Personal Access Token (for demo):');
+    // For now, we'll simulate the OAuth flow via a single prompt with instructions
+    const token = prompt(
+      [
+        'Use a GitHub Personal Access Token to sign in (demo mode).',
+        '',
+        'Required token scopes (as per README):',
+        "- repo",
+        "- read:user",
+        "- read:org",
+        "- read:discussion",
+        '',
+        'How to generate:',
+        '- GitHub Settings > Developer settings > Personal access tokens',
+        "- Create a classic token with the scopes above",
+        '',
+        'Paste your token below:'
+      ].join('\n')
+    );
     if (token) {
       localStorage.setItem('github_token', token);
       // Remove any existing user data to force a fresh fetch
@@ -46,7 +45,7 @@ const Login: React.FC = () => {
           <GitHub sx={{ fontSize: 60, color: '#4CA1A3' }} />
           
           <Typography variant="h4" component="h1" gutterBottom align="center">
-            My GitHub Workday
+            lofiles-dashboard
           </Typography>
           
           <Typography variant="body1" align="center" color="text.secondary">

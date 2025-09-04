@@ -194,12 +194,12 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser 
                     }
                     secondary={
                       <Box>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" component="span" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                           {pr.repository.nameWithOwner} • by {pr.author.login} • 
                           {formatDistanceToNow(new Date(pr.updatedAt), { addSuffix: true })}
                         </Typography>
                         
-                        <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+                        <Box display="flex" alignItems="center" gap={1}>
                           <Chip
                             label={involvement}
                             size="small"
@@ -242,6 +242,7 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser 
                         </Box>
                       </Box>
                     }
+                    disableTypography
                   />
                   
                   <Box display="flex" gap={0.5}>
