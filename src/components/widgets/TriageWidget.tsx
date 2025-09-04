@@ -268,8 +268,8 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                   '&:before': { display: 'none' },
                   boxShadow: isDirect ? 3 : 1,
                   borderRadius: '8px !important',
-                  border: isDirect ? '2px solid #388e3c' : 'none',
-                  backgroundColor: isDirect ? 'rgba(56, 142, 60, 0.06)' : 'background.paper',
+                  border: isDirect ? '2px solid #4CA1A3' : 'none',
+                  backgroundColor: isDirect ? 'rgba(76, 161, 163, 0.15)' : 'background.paper',
                   '&.Mui-expanded': { margin: '0 0 8px 0' }
                 }}
               >
@@ -280,7 +280,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                     '&.Mui-expanded': { minHeight: 48 },
                     px: 2,
                     borderRadius: '8px',
-                    backgroundColor: isDirect ? 'rgba(56, 142, 60, 0.12)' : 'transparent'
+                    backgroundColor: isDirect ? 'rgba(76, 161, 163, 0.15)' : 'transparent'
                   }}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
@@ -288,14 +288,14 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                       variant="subtitle1" 
                       sx={{ 
                         fontWeight: isDirect ? 700 : 600,
-                        color: isDirect ? '#388e3c' : 'text.primary'
+                        color: isDirect ? '#4CA1A3' : 'text.primary'
                       }}
                     >
                       {groupName}
                     </Typography>
                     <Badge 
                       badgeContent={prs.length} 
-                      color={isDirect ? "success" : "primary"} 
+                      color={"primary"} 
                       sx={{ ml: 1 }} 
                     />
                     <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
@@ -309,7 +309,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                           ml: 1, 
                           fontWeight: 600, 
                           fontSize: '0.6rem',
-                          backgroundColor: '#388e3c',
+                          backgroundColor: '#4CA1A3',
                           color: '#ffffff'
                         }}
                       />

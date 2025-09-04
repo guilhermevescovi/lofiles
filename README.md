@@ -2,6 +2,10 @@
 
 A single-pane-of-glass dashboard that cuts through the noise of GitHub notifications. It tells you exactly what needs your attention *right now*, what you're waiting on, and what you've recently been involved in, so you can start your day focused and productive.
 
+![Dashboard Screenshot](./public/assets/dashboard-screenshot.png)
+
+*Complete dashboard view with lofi music player, GitHub widgets, and focus management*
+
 ## 🎯 Core Principles
 
 1. **Action-Oriented:** The primary goal is to surface items that require an action from *you*.
