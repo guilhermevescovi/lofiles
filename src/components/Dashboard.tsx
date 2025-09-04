@@ -28,6 +28,7 @@ import TriageWidget from './widgets/TriageWidget';
 import InFlightWidget from './widgets/InFlightWidget';
 import OnRadarWidget from './widgets/OnRadarWidget';
 import FocusWidget from './widgets/FocusWidget';
+import LofiPlayer from './LofiPlayer';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -125,7 +126,7 @@ const Dashboard: React.FC = () => {
             alignItems: 'flex-start'
           }}>
             {/* Container to match GIF width */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'center', height: '100%' }}>
               {/* GIF Display - renders first to determine width */}
               <Box 
                 component="img" 
@@ -246,6 +247,8 @@ const Dashboard: React.FC = () => {
                   )}
                 </Box>
               </Paper>
+
+              <LofiPlayer />
             </Box>
           </Box>
         </Box>
