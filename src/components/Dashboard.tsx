@@ -111,6 +111,21 @@ const Dashboard: React.FC = () => {
               />
             </Box>
             
+            {/* Cat Sticker between My stuff and Focus for Today */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+              <Box 
+                component="img" 
+                src="/assets/cat-sticker.gif" 
+                alt="Cat Sticker"
+                sx={{
+                  height: 'auto',
+                  maxHeight: '50px',
+                  objectFit: 'contain',
+                  borderRadius: '8px'
+                }}
+              />
+            </Box>
+            
             <Box sx={{ height: 'calc(40% - 12px)' }}>
               <FocusWidget />
             </Box>

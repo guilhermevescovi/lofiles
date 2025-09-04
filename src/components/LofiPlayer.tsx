@@ -187,19 +187,31 @@ const LofiPlayer: React.FC = () => {
         
         {/* Content Section */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1.5, minHeight: 80, justifyContent: 'center' }}>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontFamily: '"Press Start 2P", "Courier New", monospace',
-              fontSize: '12px',
-              textShadow: '1px 1px 0px #4CA1A3',
-              color: '#ffffff',
-              letterSpacing: '0.5px',
-              lineHeight: 1.2
-            }}
-          >
-            Lofi beats
-          </Typography>
+                     <Typography 
+             variant="h6" 
+             sx={{ 
+               fontFamily: '"Press Start 2P", "Courier New", monospace',
+               fontSize: '12px',
+               textShadow: '1px 1px 0px #4CA1A3',
+               color: '#ffffff',
+               letterSpacing: '0.5px',
+               lineHeight: 1.2
+             }}
+           >
+             Lofi beats
+           </Typography>
+           
+           <Typography 
+             variant="body2" 
+             sx={{ 
+               color: 'rgba(255, 255, 255, 0.7)',
+               fontSize: '11px',
+               fontStyle: 'italic',
+               lineHeight: 1.2
+             }}
+           >
+             "Vibin'" by Purrple Cat
+           </Typography>
           
           {/* Controls Row */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
