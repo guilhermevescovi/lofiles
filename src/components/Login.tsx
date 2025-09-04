@@ -12,7 +12,18 @@ import { GitHub } from '@mui/icons-material';
 
 const Login: React.FC = () => {
   const handleGitHubLogin = () => {
-    // For now, we'll simulate the OAuth flow via a single prompt with instructions
+    // Check if token is provided via environment variable (for Docker)
+    const envToken = process.env.REACT_APP_GITHUB_TOKEN;
+    
+    if (envToken) {
+      localStorage.setItem('github_token', envToken);
+      // Remove any existing user data to force a fresh fetch
+      localStorage.removeItem('github_user');
+      window.location.reload();
+      return;
+    }
+
+    // Fallback to prompt for manual token entry
     const token = prompt(
       [
         'Use a GitHub Personal Access Token to sign in (demo mode).',
