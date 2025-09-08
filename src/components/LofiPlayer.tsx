@@ -38,8 +38,8 @@ const wave4 = keyframes`
 `;
 
 // Local lofi track - your downloaded Vibin track
-const DEFAULT_STREAM_URL_MP3 = '/audio/vibin-lofi.mp3';
-const DEFAULT_STREAM_URL_OGG = '/audio/vibin-lofi.mp3'; // fallback to same MP3
+const DEFAULT_STREAM_URL_MP3 = `${process.env.PUBLIC_URL}/audio/vibin-lofi.mp3`;
+const DEFAULT_STREAM_URL_OGG = `${process.env.PUBLIC_URL}/audio/vibin-lofi.mp3`; // fallback to same MP3
 
 // Alternative options (streaming radios):
 // LoFi Cafe: 'https://cast1.lofiradio.com/lofi'
