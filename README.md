@@ -198,7 +198,5 @@ Make sure your GitHub Personal Access Token has these scopes:
 - **Isolation**: Browser storage is scoped per origin and per browser profile. Other users on other devices/browsers/profiles cannot access your token. Private/incognito windows have separate storage.
 - **Risk (XSS)**: Any JavaScript that runs on this page can read `localStorage`. Avoid injecting untrusted content and keep dependencies up-to-date. Consider a strict Content Security Policy (CSP) for hardened deployments.
 - **Persistence**: Tokens in `localStorage` persist across restarts. If you prefer non-persistent sessions, change the implementation to use `sessionStorage` instead.
-- **Do not embed build-time tokens**: Never set `REACT_APP_GITHUB_TOKEN` for production builds or deployments. CRA inlines `REACT_APP_*` variables into the static bundle and they can be scanned/exposed.
-- **Stronger production option**: Use OAuth with a backend that exchanges the code for an access token and stores a short-lived session in an HttpOnly, Secure cookie. Proxy GitHub API calls server-side so tokens are never exposed to the browser.
 
 
