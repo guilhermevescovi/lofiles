@@ -195,7 +195,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
         </Typography>
         <Box 
           component="img" 
-          src="/assets/internet-running.gif" 
+          src={`${process.env.PUBLIC_URL}/assets/internet-running.gif`} 
           alt="Internet Running"
           sx={{
             height: 'auto',

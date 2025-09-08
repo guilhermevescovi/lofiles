@@ -156,7 +156,7 @@ const Dashboard: React.FC = () => {
             <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
               <Box 
                 component="img" 
-                src="/assets/cat-sticker.gif" 
+                src={`${process.env.PUBLIC_URL}/assets/cat-sticker.gif`} 
                 alt="Cat Sticker"
                 sx={{
                   height: 'auto',
@@ -186,7 +186,7 @@ const Dashboard: React.FC = () => {
               {/* GIF Display - renders first to determine width */}
               <Box 
                 component="img" 
-                src="/assets/dashboard-animation.gif" 
+                src={`${process.env.PUBLIC_URL}/assets/dashboard-animation.gif`} 
                 alt="Cozy Coding Animation"
                 sx={{
                   height: 'auto',
