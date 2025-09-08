@@ -148,24 +148,10 @@ docker compose up -d --build
 
 ### GitHub Integration
 - **GitHub GraphQL API v4** - Single, efficient API calls instead of dozens of REST requests
-- **OAuth 2.0 Authentication** - Secure, standard GitHub login flow
 - **Comprehensive Data Fetching** - All dashboard data in one GraphQL query
 
-### Key Technical Features
-- **Auto-refresh every 5 minutes** - Stay up-to-date without manual refreshing
-- **Intelligent PR status detection** - Draft, Awaiting Review, In Review, Approved, Changes Requested
-- **New commits detection** - Highlights PRs with commits since your last review
-- **Responsive design** - Works on desktop and mobile
-- **Dark mode ready** - Theme toggle in navigation
 
-## 🎨 UI/UX Highlights
 
-- **Single-pane dashboard** - Everything visible at once, no navigation needed
-- **Color-coded status indicators** - Immediate visual understanding
-- **Smart sorting** - Items needing attention appear first
-- **Click-to-open** - Direct links to GitHub for detailed actions
-- **Contextual information** - Repository, authors, timestamps, CI status
-- **Focus management** - Personal pinning system to avoid distraction
 
 ## 🛠️ Available Scripts
 
@@ -205,16 +191,4 @@ Make sure your GitHub Personal Access Token has these scopes:
 - `read:org` - Read organization and team information
 - `read:discussion` - Read discussions
 
-## 🔮 Future Enhancements
 
-### Potential Extensions
-- **Repository filtering** - Focus on specific repositories
-- **Notification preferences** - Customize what appears in each widget
-- **Time-based insights** - "You've been waiting on review for X days"
-- **Team views** - See your team's workstream
-- **Push notifications** - Browser notifications for urgent items
-- **Slack/Teams integration** - Daily digest messages
-
----
-
-**Built with ❤️ for developers who want to focus on what matters most.**
