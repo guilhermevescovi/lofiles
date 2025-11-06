@@ -34,11 +34,11 @@ import { PullRequest } from '../../types/github';
 import { useFocus } from '../../context/FocusContext';
 import { useThemeMode } from '../../context/ThemeContext';
 
-interface OnRadarWidgetProps {
+interface OnMyRadarWidgetProps {
   // No props needed - widget fetches its own data
 }
 
-const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
+const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
   const { themeName } = useThemeMode();
   const isLofiTheme = themeName === 'lofi';
@@ -56,7 +56,7 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
   // Validate and filter out invalid PRs
   const validPRs = React.useMemo(() => {
     if (!Array.isArray(involvedPRs)) {
-      console.warn('OnRadarWidget: involvedPRs is not an array:', involvedPRs);
+      console.warn('OnMyRadarWidget: involvedPRs is not an array:', involvedPRs);
       return [];
     }
     const valid = involvedPRs.filter(pr => 
@@ -71,7 +71,7 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
     );
     
     if (involvedPRs.length > 0 && valid.length === 0) {
-      console.warn('OnRadarWidget: All PRs were filtered out as invalid:', involvedPRs);
+      console.warn('OnMyRadarWidget: All PRs were filtered out as invalid:', involvedPRs);
     }
     
     return valid;
@@ -422,4 +422,4 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
   );
 };
 
-export default OnRadarWidget;
+export default OnMyRadarWidget;

@@ -31,7 +31,7 @@ import { useFocus } from '../../context/FocusContext';
 import { PullRequest } from '../../types/github';
 import { useThemeMode } from '../../context/ThemeContext';
 
-const FocusWidget: React.FC = () => {
+const FocusForTodayWidget: React.FC = () => {
   const { focusItems, addToFocus, removeFromFocus } = useFocus();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newItemUrl, setNewItemUrl] = useState('');
@@ -298,4 +298,4 @@ const FocusWidget: React.FC = () => {
   );
 };
 
-export default FocusWidget;
+export default FocusForTodayWidget;

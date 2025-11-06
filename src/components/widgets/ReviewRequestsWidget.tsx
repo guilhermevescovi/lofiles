@@ -37,7 +37,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useFocus } from '../../context/FocusContext';
 import { useThemeMode } from '../../context/ThemeContext';
 
-interface TriageWidgetProps {
+interface ReviewRequestsWidgetProps {
   selectedAuthor?: string | null;
   onClearFilter?: () => void;
   prs: PullRequest[];
@@ -46,7 +46,7 @@ interface TriageWidgetProps {
   onRetry?: () => void;
 }
 
-const TriageWidget: React.FC<TriageWidgetProps> = ({
+const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
   selectedAuthor,
   onClearFilter,
   prs,
@@ -491,4 +491,4 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({
   );
 };
 
-export default TriageWidget;
+export default ReviewRequestsWidget;

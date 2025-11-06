@@ -35,11 +35,11 @@ import { PullRequest, Issue } from '../../types/github';
 import { useFocus } from '../../context/FocusContext';
 import { useThemeMode } from '../../context/ThemeContext';
 
-interface InFlightWidgetProps {
+interface MyStuffWidgetProps {
   // No props needed - widget fetches its own data
 }
 
-const InFlightWidget: React.FC<InFlightWidgetProps> = () => {
+const MyStuffWidget: React.FC<MyStuffWidgetProps> = () => {
   const [tabValue, setTabValue] = React.useState(0);
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
   const { themeName } = useThemeMode();
@@ -365,4 +365,4 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = () => {
   );
 };
 
-export default InFlightWidget;
+export default MyStuffWidget;

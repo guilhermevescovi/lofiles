@@ -12,10 +12,10 @@ import { Logout, GitHub, GraphicEq } from '@mui/icons-material';
 import { useQuery } from '@apollo/client';
 import { useAuth } from '../context/AuthContext';
 import { useThemeMode } from '../context/ThemeContext';
-import TriageWidget from './widgets/TriageWidget';
-import InFlightWidget from './widgets/InFlightWidget';
-import OnRadarWidget from './widgets/OnRadarWidget';
-import FocusWidget from './widgets/FocusWidget';
+import ReviewRequestsWidget from './widgets/ReviewRequestsWidget';
+import MyStuffWidget from './widgets/MyStuffWidget';
+import OnMyRadarWidget from './widgets/OnMyRadarWidget';
+import FocusForTodayWidget from './widgets/FocusForTodayWidget';
 import LofiPlayer from './LofiPlayer';
 import WhoBothersMeWidget from './widgets/WhoBothersMeWidget';
 import { GET_PRS_TO_REVIEW } from '../apollo/queries';
@@ -70,9 +70,9 @@ const Dashboard: React.FC = () => {
       <Box sx={{ flex: 1, overflow: 'hidden', p: 3 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
           <Box sx={{ display: 'flex', gap: 3, flex: 1, minHeight: 0 }}>
-          {/* Column 1: Triage Widget - Most Critical */}
+          {/* Column 1: Review Requests - Most Critical */}
           <Box sx={{ flex: '1 1 300px', minWidth: '300px', height: '100%' }}>
-            <TriageWidget 
+            <ReviewRequestsWidget 
               selectedAuthor={selectedAuthor}
               onClearFilter={() => setSelectedAuthor(null)}
               prs={prsToReview}
@@ -84,15 +84,15 @@ const Dashboard: React.FC = () => {
             />
           </Box>
 
-          {/* Column 2: On My Radar Widget - Context Tracking */}
+          {/* Column 2: On My Radar - Context Tracking */}
           <Box sx={{ flex: '1 1 300px', minWidth: '300px', height: '100%' }}>
-            <OnRadarWidget />
+            <OnMyRadarWidget />
           </Box>
 
-          {/* Column 3: In-Flight and Focus Stack */}
+          {/* Column 3: My Stuff and Focus Stack */}
           <Box sx={{ flex: '1 1 400px', minWidth: '400px', height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ height: '60%', mb: 1.5 }}>
-              <InFlightWidget />
+              <MyStuffWidget />
             </Box>
             
             {/* Cat Sticker between My stuff and Focus for Today */}
@@ -113,7 +113,7 @@ const Dashboard: React.FC = () => {
             )}
             
             <Box sx={{ height: 'calc(40% - 12px)' }}>
-              <FocusWidget />
+              <FocusForTodayWidget />
             </Box>
           </Box>
 
