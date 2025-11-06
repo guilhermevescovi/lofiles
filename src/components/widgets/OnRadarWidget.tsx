@@ -15,30 +15,37 @@ import {
   CircularProgress,
   Button
 } from '@mui/material';
-import { 
-  Radar, 
-  CheckCircle, 
-  Error, 
-  Schedule, 
+import {
+  Radar,
+  CheckCircle,
+  Error,
+  Schedule,
   OpenInNew,
   NewReleases,
   Star,
   StarBorder
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
+import { useQuery } from '@apollo/client';
+import { GET_INVOLVED_PRS } from '../../apollo/queries';
 import { PullRequest } from '../../types/github';
 import { useFocus } from '../../context/FocusContext';
 
 interface OnRadarWidgetProps {
-  involvedPRs: PullRequest[];
-  currentUser: string;
-  isLoading?: boolean;
-  error?: Error | null;
-  onRetry?: () => void;
+  // No props needed - widget fetches its own data
 }
 
-const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser, isLoading, error, onRetry }) => {
+const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
+
+  // Fetch involved PRs
+  const { data, loading: isLoading, error, refetch } = useQuery(GET_INVOLVED_PRS, {
+    pollInterval: 300000, // Auto-refresh every 5 minutes
+    fetchPolicy: 'cache-and-network'
+  });
+
+  const involvedPRs = data?.involvedPRs?.nodes || [];
+  const currentUser = data?.viewer?.login || '';
   
   // Validate and filter out invalid PRs
   const validPRs = React.useMemo(() => {
@@ -105,8 +112,12 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser,
     }
   };
 
-  const openInNewTab = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  const handlePRClick = (e: React.MouseEvent, url: string) => {
+    // Support both left click and middle click
+    if (e.button === 0 || e.button === 1) {
+      e.preventDefault();
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleFocusToggle = (pr: PullRequest, e: React.MouseEvent) => {
@@ -181,15 +192,13 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser,
           </Typography>
         </Box>
         
-        <Alert 
-          severity="error" 
+        <Alert
+          severity="error"
           sx={{ mb: 2 }}
           action={
-            onRetry && (
-              <Button color="inherit" size="small" onClick={onRetry}>
-                Retry
-              </Button>
-            )
+            <Button color="inherit" size="small" onClick={() => refetch()}>
+              Retry
+            </Button>
           }
         >
           Failed to load radar data. {error.message}
@@ -253,9 +262,9 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser,
             
             return (
               <React.Fragment key={pr.id}>
-                <ListItem 
+                <ListItem
                   alignItems="flex-start"
-                  sx={{ 
+                  sx={{
                     px: 2,
                     '&:hover': { backgroundColor: 'action.hover' },
                     borderRadius: 1,
@@ -263,7 +272,7 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser,
                     backgroundColor: hasNewCommits ? 'rgba(76, 161, 163, 0.15)' : 'transparent',
                     opacity: hasNewCommits ? 1 : 0.8
                   }}
-                  onClick={() => openInNewTab(pr.url)}
+                  onMouseDown={(e) => handlePRClick(e, pr.url)}
                 >
                   <ListItemAvatar>
                     <Avatar src={pr.author.avatarUrl} sx={{ width: 32, height: 32 }} />
@@ -320,7 +329,7 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser,
                             />
                           )}
                           
-                          {pr.labels.nodes.slice(0, 2).map((label) => (
+                          {pr.labels.nodes.slice(0, 2).map((label: { name: string; color: string }) => (
                             <Chip
                               key={label.name}
                               label={label.name}
@@ -352,10 +361,13 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = ({ involvedPRs, currentUser,
                       )}
                     </IconButton>
                     
-                    <IconButton size="small" onClick={(e) => {
-                      e.stopPropagation();
-                      openInNewTab(pr.url);
-                    }}>
+                    <IconButton
+                      size="small"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handlePRClick(e, pr.url);
+                      }}
+                    >
                       <OpenInNew fontSize="small" />
                     </IconButton>
                   </Box>

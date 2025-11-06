@@ -88,8 +88,12 @@ const FocusWidget: React.FC = () => {
     setIsAddDialogOpen(false);
   };
 
-  const openInNewTab = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  const handleItemClick = (e: React.MouseEvent, url: string) => {
+    // Support both left click and middle click
+    if (e.button === 0 || e.button === 1) {
+      e.preventDefault();
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -142,15 +146,15 @@ const FocusWidget: React.FC = () => {
           <List dense>
             {focusItems.map((item, index) => (
               <React.Fragment key={item.id}>
-                <ListItem 
+                <ListItem
                   alignItems="flex-start"
-                  sx={{ 
+                  sx={{
                     px: 0,
                     '&:hover': { backgroundColor: 'action.hover' },
                     borderRadius: 1,
                     cursor: 'pointer'
                   }}
-                  onClick={() => openInNewTab(item.url)}
+                  onMouseDown={(e) => handleItemClick(e, item.url)}
                 >
                   <ListItemAvatar>
                     <Avatar sx={{ 
@@ -193,10 +197,13 @@ const FocusWidget: React.FC = () => {
                   />
                   
                   <Box display="flex" gap={0.5}>
-                    <IconButton size="small" onClick={(e) => {
-                      e.stopPropagation();
-                      openInNewTab(item.url);
-                    }}>
+                    <IconButton
+                      size="small"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handleItemClick(e, item.url);
+                      }}
+                    >
                       <OpenInNew fontSize="small" />
                     </IconButton>
                     

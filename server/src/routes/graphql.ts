@@ -18,12 +18,9 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
 
     // Use token from session
     const token = req.session.githubToken!;
-    console.log('GraphQL proxy - Token exists:', !!token);
-    console.log('GraphQL proxy - User:', req.session.githubUser?.login);
 
     // Forward request to GitHub
     const result = await githubClient.graphqlProxy(token, query, variables);
-    console.log('GraphQL proxy - Result received:', !!result);
 
     res.json(result);
   } catch (error) {

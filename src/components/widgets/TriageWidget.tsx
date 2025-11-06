@@ -14,36 +14,44 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Badge
+  Badge,
+  CircularProgress,
+  Alert,
+  Button
 } from '@mui/material';
-import { 
-  PriorityHigh, 
-  CheckCircle, 
-  Error, 
-  Schedule, 
+import {
+  PriorityHigh,
+  CheckCircle,
+  Error,
+  Schedule,
   OpenInNew,
   ExpandMore,
   Star,
-  StarBorder,
-  Clear
+  StarBorder
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
+import { useQuery } from '@apollo/client';
+import { GET_PRS_TO_REVIEW } from '../../apollo/queries';
 import { PullRequest } from '../../types/github';
 import { useAuth } from '../../context/AuthContext';
 import { useFocus } from '../../context/FocusContext';
 
 interface TriageWidgetProps {
-  prsToReview: PullRequest[];
-  mentions: any[]; // We'll type this properly later
-  selectedUser?: string | null;
-  onClearFilter?: () => void;
+  // No props needed - widget fetches its own data
 }
 
-const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, selectedUser, onClearFilter }) => {
-  // Get current user from the Dashboard component
+const TriageWidget: React.FC<TriageWidgetProps> = () => {
   const { user } = useAuth();
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Directly Assigned']));
+
+  // Fetch PRs to review
+  const { data, loading, error, refetch } = useQuery(GET_PRS_TO_REVIEW, {
+    pollInterval: 300000, // Auto-refresh every 5 minutes
+    fetchPolicy: 'cache-and-network'
+  });
+
+  const prsToReview = data?.prsToReview?.nodes || [];
 
   const getStatusColor = (pr: PullRequest) => {
     const latestCommit = pr.commits.nodes[0];
@@ -79,8 +87,12 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
     }
   };
 
-  const openInNewTab = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  const handlePRClick = (e: React.MouseEvent, url: string) => {
+    // Support both left click and middle click
+    if (e.button === 0 || e.button === 1) {
+      e.preventDefault();
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleFocusToggle = (pr: PullRequest, e: React.MouseEvent) => {
@@ -95,22 +107,15 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
     }
   };
 
-  // Filter PRs by selected user if any
-  const filteredPRs = React.useMemo(() => {
-    if (!selectedUser) return prsToReview;
-    
-    return prsToReview.filter(pr => pr.author.login === selectedUser);
-  }, [prsToReview, selectedUser]);
-
   // Group PRs by review assignment type and sort by last updated
   const groupPRsByAssignment = () => {
     const groups: { [key: string]: { prs: PullRequest[], isDirect: boolean } } = {};
-    
-    filteredPRs.forEach(pr => {
+
+    prsToReview.forEach((pr: PullRequest) => {
       let isDirectlyAssigned = false;
       const assignmentTypes = new Set<string>();
-      
-      pr.reviewRequests?.nodes?.forEach(request => {
+
+      pr.reviewRequests?.nodes?.forEach((request: any) => {
         const reviewer = request?.requestedReviewer;
         
         if (!reviewer) return;
@@ -205,52 +210,27 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
           }}
         />
       </Box>
-      
-      {selectedUser && onClearFilter && (
-        <Box 
-          display="flex" 
-          alignItems="center" 
-          justifyContent="space-between" 
-          mb={2}
-          sx={{
-            backgroundColor: 'rgba(76, 161, 163, 0.15)',
-            border: '1px solid rgba(76, 161, 163, 0.3)',
-            borderRadius: 1,
-            px: 2,
-            py: 1
-          }}
-        >
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              color: '#4CA1A3',
-              fontWeight: 600
-            }}
-          >
-            Filtered by: {selectedUser}
-          </Typography>
-          <IconButton 
-            size="small" 
-            onClick={onClearFilter}
-            title="Clear filter"
-            sx={{ 
-              color: '#4CA1A3',
-              '&:hover': { backgroundColor: 'rgba(76, 161, 163, 0.2)' }
-            }}
-          >
-            <Clear fontSize="small" />
-          </IconButton>
-        </Box>
-      )}
-      
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Pull requests waiting for your review
       </Typography>
 
-      {filteredPRs.length === 0 ? (
+      {loading && prsToReview.length === 0 ? (
+        <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 2 }}>
+          <Alert severity="error" sx={{ width: '100%' }}>
+            Failed to load PRs. {error.message}
+          </Alert>
+          <Button onClick={() => refetch()} variant="contained" size="small">
+            Retry
+          </Button>
+        </Box>
+      ) : prsToReview.length === 0 ? (
         <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Typography variant="body2" color="text.secondary">
-            {selectedUser ? `🎯 No PRs from ${selectedUser} waiting for your review!` : '🎉 No PRs waiting for your review!'}
+            🎉 No PRs waiting for your review!
           </Typography>
         </Box>
       ) : (
@@ -321,9 +301,9 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                   <List dense>
                     {prs.map((pr, index) => (
                       <React.Fragment key={pr.id}>
-                        <ListItem 
+                        <ListItem
                           alignItems="flex-start"
-                          sx={{ 
+                          sx={{
                             px: 2,
                             '&:hover': { backgroundColor: 'action.hover' },
                             borderRadius: 1,
@@ -331,7 +311,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                             backgroundColor: isCriticalPR(pr) ? 'rgba(255, 20, 147, 0.2)' : 'transparent',
                             borderLeft: isCriticalPR(pr) ? '4px solid #ff1493' : 'none'
                           }}
-                          onClick={() => openInNewTab(pr.url)}
+                          onMouseDown={(e) => handlePRClick(e, pr.url)}
                         >
                           <ListItemAvatar>
                             <Avatar src={pr.author.avatarUrl} sx={{ width: 32, height: 32 }} />
@@ -418,10 +398,13 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ prsToReview, mentions, sele
                               )}
                             </IconButton>
                             
-                            <IconButton size="small" onClick={(e) => {
-                              e.stopPropagation();
-                              openInNewTab(pr.url);
-                            }}>
+                            <IconButton
+                              size="small"
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                handlePRClick(e, pr.url);
+                              }}
+                            >
                               <OpenInNew fontSize="small" />
                             </IconButton>
                           </Box>

@@ -1,30 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Container,
-  Grid,
   Typography,
-  AppBar,
-  Toolbar,
   Avatar,
   IconButton,
-  Box,
-  Button,
-  CircularProgress,
-  Alert,
-  Paper,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Divider
+  Box
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { keyframes } from '@mui/system';
-import { Refresh, Logout } from '@mui/icons-material';
-import { useQuery } from '@apollo/client';
+import { Logout } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
-import { GET_WORKDAY_DASHBOARD } from '../apollo/queries';
-import { WorkdayDashboardData } from '../types/github';
 import TriageWidget from './widgets/TriageWidget';
 import InFlightWidget from './widgets/InFlightWidget';
 import OnRadarWidget from './widgets/OnRadarWidget';
@@ -65,57 +49,6 @@ const glitchAfter = keyframes`
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  
-  const { data, loading, error, refetch } = useQuery<WorkdayDashboardData>(GET_WORKDAY_DASHBOARD, {
-    pollInterval: 300000, // Auto-refresh every 5 minutes
-    errorPolicy: 'all',
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: 'cache-and-network' // Always try to fetch fresh data
-  });
-
-  const pendingByAuthor = React.useMemo(() => {
-    const counts: Record<string, { login: string; avatarUrl?: string; count: number }> = {};
-    const prs = data?.prsToReview?.nodes || [];
-    prs.forEach(pr => {
-      const login = pr.author?.login || 'unknown';
-      const avatarUrl = pr.author?.avatarUrl;
-      if (!counts[login]) {
-        counts[login] = { login, avatarUrl, count: 0 };
-      }
-      counts[login].count += 1;
-    });
-    return Object.values(counts).sort((a, b) => b.count - a.count);
-  }, [data?.prsToReview?.nodes]);
-
-  const handleRefresh = () => {
-    refetch();
-  };
-
-  if (loading && !data) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Alert severity="error">
-          Failed to load dashboard data. Please check your GitHub token and try again.
-          <br />
-          Error: {error.message}
-        </Alert>
-        <Box sx={{ mt: 2 }}>
-          <Button onClick={handleRefresh} variant="contained">
-            Retry
-          </Button>
-        </Box>
-      </Container>
-    );
-  }
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -124,32 +57,18 @@ const Dashboard: React.FC = () => {
         <Box sx={{ display: 'flex', gap: 3, height: '100%' }}>
           {/* Column 1: Triage Widget - Most Critical */}
           <Box sx={{ flex: '1 1 300px', minWidth: '300px', height: '100%' }}>
-            <TriageWidget 
-              prsToReview={data?.prsToReview?.nodes || []}
-              mentions={[]} // We'll implement mentions later
-              selectedUser={selectedUser}
-              onClearFilter={() => setSelectedUser(null)}
-            />
+            <TriageWidget />
           </Box>
 
           {/* Column 2: On My Radar Widget - Context Tracking */}
           <Box sx={{ flex: '1 1 300px', minWidth: '300px', height: '100%' }}>
-            <OnRadarWidget 
-              involvedPRs={data?.involvedPRs?.nodes || []}
-              currentUser={data?.viewer?.login || ''}
-              isLoading={loading}
-              error={error}
-              onRetry={handleRefresh}
-            />
+            <OnRadarWidget />
           </Box>
 
           {/* Column 3: In-Flight and Focus Stack */}
           <Box sx={{ flex: '1 1 400px', minWidth: '400px', height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ height: '60%', mb: 1.5 }}>
-              <InFlightWidget 
-                myOpenPRs={data?.myOpenPRs?.nodes || []}
-                assignedIssues={data?.assignedIssues?.nodes || []}
-              />
+              <InFlightWidget />
             </Box>
             
             {/* Cat Sticker between My stuff and Focus for Today */}
@@ -297,120 +216,6 @@ const Dashboard: React.FC = () => {
                 <Logout fontSize="small" />
               </IconButton>
               </Box>
-
-              {/* Arcade Score Display */}
-              <Paper 
-                elevation={0} 
-                sx={{ 
-                  mt: 2, 
-                  width: '100%', 
-                  order: 3, 
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)', 
-                  border: '2px solid #4CA1A3', 
-                  borderRadius: '8px', 
-                  boxShadow: 'none',
-                  p: 2
-                }}
-              >
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      fontFamily: '"Press Start 2P", "Courier New", monospace',
-                      fontSize: '10px',
-                      color: '#4CA1A3',
-                      letterSpacing: '1px',
-                      display: 'block',
-                      mb: 1
-                    }}
-                  >
-                    REVIEW SCORE
-                  </Typography>
-                  <Typography 
-                    variant="h4" 
-                    sx={{ 
-                      fontFamily: '"Press Start 2P", "Courier New", monospace',
-                      fontSize: '24px',
-                      color: '#00ff00',
-                      textShadow: '0 0 10px #00ff00',
-                      letterSpacing: '2px',
-                      lineHeight: 1,
-                      mb: 0.5
-                    }}
-                  >
-                    0000000
-                  </Typography>
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      fontFamily: '"Press Start 2P", "Courier New", monospace',
-                      fontSize: '8px',
-                      color: '#4CA1A3',
-                      letterSpacing: '0.5px',
-                      opacity: 0.7
-                    }}
-                  >
-                    API COMING SOON
-                  </Typography>
-                </Box>
-              </Paper>
-
-              {/* Pending Reviews Ranking */}
-              <Paper elevation={0} sx={{ mt: 2, width: '100%', order: 4, backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.4), border: '1px solid rgba(76, 161, 163, 0.2)', borderRadius: '12px', boxShadow: 'none' }}>
-                <Box sx={{ p: 1.5 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                    Who disturbs my peace
-                  </Typography>
-                  {pendingByAuthor.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">
-                      No pending review requests.
-                    </Typography>
-                  ) : (
-                    <List dense disablePadding>
-                      {pendingByAuthor.map(({ login, avatarUrl, count }, index) => (
-                        <React.Fragment key={login}>
-                          <ListItem 
-                            sx={{ 
-                              py: 0.5,
-                              cursor: 'pointer',
-                              '&:hover': { 
-                                backgroundColor: 'rgba(76, 161, 163, 0.1)',
-                                borderRadius: 1
-                              }
-                            }}
-                            onClick={() => setSelectedUser(login)}
-                          >
-                            <ListItemAvatar>
-                              <Avatar src={avatarUrl} alt={login} sx={{ width: 28, height: 28 }} />
-                            </ListItemAvatar>
-                            <ListItemText
-                              primary={
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                  <Typography 
-                                    variant="body2" 
-                                    sx={{ 
-                                      mr: 2,
-                                      '&:hover': { 
-                                        color: '#4CA1A3'
-                                      }
-                                    }}
-                                  >
-                                    {login}
-                                  </Typography>
-                                  <Typography variant="body2" color="text.secondary">
-                                    {count}
-                                  </Typography>
-                                </Box>
-                              }
-                            />
-                          </ListItem>
-                          {index < pendingByAuthor.length - 1 && <Divider component="li" sx={{ opacity: 0.2 }} />}
-                        </React.Fragment>
-                      ))}
-                    </List>
-                  )}
-                </Box>
-              </Paper>
 
               <LofiPlayer />
             </Box>

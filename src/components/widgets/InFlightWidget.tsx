@@ -12,31 +12,44 @@ import {
   IconButton,
   Divider,
   Tabs,
-  Tab
+  Tab,
+  CircularProgress,
+  Alert,
+  Button
 } from '@mui/material';
-import { 
-  Assignment, 
-  MergeType, 
-  CheckCircle, 
-  Error, 
-  Schedule, 
+import {
+  Assignment,
+  MergeType,
+  CheckCircle,
+  Error,
+  Schedule,
   OpenInNew,
   Person,
   Star,
   StarBorder
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
+import { useQuery } from '@apollo/client';
+import { GET_MY_WORK } from '../../apollo/queries';
 import { PullRequest, Issue } from '../../types/github';
 import { useFocus } from '../../context/FocusContext';
 
 interface InFlightWidgetProps {
-  myOpenPRs: PullRequest[];
-  assignedIssues: Issue[];
+  // No props needed - widget fetches its own data
 }
 
-const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssues }) => {
+const InFlightWidget: React.FC<InFlightWidgetProps> = () => {
   const [tabValue, setTabValue] = React.useState(0);
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
+
+  // Fetch my work (PRs and issues)
+  const { data, loading, error, refetch } = useQuery(GET_MY_WORK, {
+    pollInterval: 300000, // Auto-refresh every 5 minutes
+    fetchPolicy: 'cache-and-network'
+  });
+
+  const myOpenPRs = data?.myOpenPRs?.nodes || [];
+  const assignedIssues = data?.assignedIssues?.nodes || [];
 
   const getPRStatus = (pr: PullRequest) => {
     if (pr.isDraft) return 'Draft';
@@ -74,8 +87,12 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
     }
   };
 
-  const openInNewTab = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  const handleItemClick = (e: React.MouseEvent, url: string) => {
+    // Support both left click and middle click
+    if (e.button === 0 || e.button === 1) {
+      e.preventDefault();
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -94,11 +111,32 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
     }
   };
 
+  if (loading && myOpenPRs.length === 0 && assignedIssues.length === 0) {
+    return (
+      <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Paper>
+    );
+  }
+
+  if (error) {
+    return (
+      <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+        <Alert severity="error" sx={{ width: '100%' }}>
+          Failed to load your work. {error.message}
+        </Alert>
+        <Button onClick={() => refetch()} variant="contained" size="small">
+          Retry
+        </Button>
+      </Paper>
+    );
+  }
+
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box display="flex" alignItems="center" mb={2}>
-        <Typography 
-          variant="h6" 
+        <Typography
+          variant="h6"
           component="h2"
           sx={{
             fontFamily: '"Press Start 2P", "Courier New", monospace',
@@ -111,7 +149,7 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
           My Stuff
         </Typography>
       </Box>
-      
+
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
         <Tab 
           label={`My PRs (${myOpenPRs.length})`} 
@@ -142,17 +180,17 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
             ) : (
               <Box sx={{ flex: 1, overflow: 'auto', pr: 1, minHeight: 0 }}>
                 <List dense>
-                  {myOpenPRs.map((pr, index) => (
+                  {myOpenPRs.map((pr: PullRequest, index: number) => (
                   <React.Fragment key={pr.id}>
                     <ListItem 
                       alignItems="flex-start"
-                      sx={{ 
+                      sx={{
                         px: 0,
                         '&:hover': { backgroundColor: 'action.hover' },
                         borderRadius: 1,
                         cursor: 'pointer'
                       }}
-                      onClick={() => openInNewTab(pr.url)}
+                      onMouseDown={(e) => handleItemClick(e, pr.url)}
                     >
                       <ListItemAvatar>
                         <Avatar sx={{ width: 32, height: 32, backgroundColor: 'primary.main' }}>
@@ -209,10 +247,13 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
                           )}
                         </IconButton>
                         
-                        <IconButton size="small" onClick={(e) => {
-                          e.stopPropagation();
-                          openInNewTab(pr.url);
-                        }}>
+                        <IconButton
+                          size="small"
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                            handleItemClick(e, pr.url);
+                          }}
+                        >
                           <OpenInNew fontSize="small" />
                         </IconButton>
                       </Box>
@@ -243,17 +284,17 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
             ) : (
               <Box sx={{ flex: 1, overflow: 'auto', pr: 1, minHeight: 0 }}>
                 <List dense>
-                  {assignedIssues.map((issue, index) => (
+                  {assignedIssues.map((issue: Issue, index: number) => (
                   <React.Fragment key={issue.id}>
                     <ListItem 
                       alignItems="flex-start"
-                      sx={{ 
+                      sx={{
                         px: 0,
                         '&:hover': { backgroundColor: 'action.hover' },
                         borderRadius: 1,
                         cursor: 'pointer'
                       }}
-                      onClick={() => openInNewTab(issue.url)}
+                      onMouseDown={(e) => handleItemClick(e, issue.url)}
                     >
                       <ListItemAvatar>
                         <Avatar src={issue.author.avatarUrl} sx={{ width: 32, height: 32 }} />
@@ -297,10 +338,13 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = ({ myOpenPRs, assignedIssu
                         disableTypography
                       />
                       
-                      <IconButton size="small" onClick={(e) => {
-                        e.stopPropagation();
-                        openInNewTab(issue.url);
-                      }}>
+                      <IconButton
+                        size="small"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          handleItemClick(e, issue.url);
+                        }}
+                      >
                         <OpenInNew fontSize="small" />
                       </IconButton>
                     </ListItem>
