@@ -38,6 +38,11 @@ A single-pane-of-glass dashboard that cuts through the noise of GitHub notificat
 - Stored in browser localStorage - your personal to-do list
 - Add items via GitHub URL with auto-parsing
 
+### 🔔 Notification Highlights
+- Quick dropdown in the header showing pending review requests and focus items
+- Badge count keeps you aware of new work without leaving the dashboard
+- One-click navigation opens items in new tabs for fast triage
+
 ## 🚀 Quick Start
 
 ### Prerequisites

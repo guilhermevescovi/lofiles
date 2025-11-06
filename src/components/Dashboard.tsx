@@ -12,6 +12,7 @@ import { Logout, GitHub, GraphicEq } from '@mui/icons-material';
 import { useQuery } from '@apollo/client';
 import { useAuth } from '../context/AuthContext';
 import { useThemeMode } from '../context/ThemeContext';
+import { useFocus } from '../context/FocusContext';
 import ReviewRequestsWidget from './widgets/ReviewRequestsWidget';
 import MyStuffWidget from './widgets/MyStuffWidget';
 import OnMyRadarWidget from './widgets/OnMyRadarWidget';
@@ -20,6 +21,7 @@ import LofiPlayer from './LofiPlayer';
 import WhoBothersMeWidget from './widgets/WhoBothersMeWidget';
 import { GET_PRS_TO_REVIEW } from '../apollo/queries';
 import type { PullRequest } from '../types/github';
+import NotificationHighlightsDropdown from './NotificationHighlightsDropdown';
 
 // Glitch keyframes for the Lo-files title
 const glitchMain = keyframes`
@@ -63,6 +65,7 @@ const Dashboard: React.FC = () => {
     fetchPolicy: 'cache-and-network'
   });
   const prsToReview = (prsData?.prsToReview?.nodes as PullRequest[]) ?? [];
+  const { focusItems } = useFocus();
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -145,8 +148,7 @@ const Dashboard: React.FC = () => {
               )}
               
               {/* Pixel title above user card */}
-              <Box sx={{ alignSelf: 'flex-end', order: 0, mb: 1, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-                <Box sx={{ flex: 1 }} />
+              <Box sx={{ alignSelf: 'flex-end', order: 0, mb: 1, width: '100%', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography 
                   variant="caption" 
                   sx={{ 
@@ -189,21 +191,31 @@ const Dashboard: React.FC = () => {
                 >
                   Lo-files
                 </Typography>
-                <Tooltip title={isLofiTheme ? 'Switch to GitHub Dark theme' : 'Switch to Lo-fi vibe theme'}>
-                  <IconButton
-                    color="inherit"
-                    onClick={toggleTheme}
-                    aria-label="Toggle theme"
-                    size="small"
-                    sx={{
-                      border: '1px solid',
-                      borderColor: (theme) => theme.palette.divider,
-                      backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.6)
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginLeft: 'auto' }}>
+                  <Tooltip title={isLofiTheme ? 'Switch to GitHub Dark theme' : 'Switch to Lo-fi vibe theme'}>
+                    <IconButton
+                      color="inherit"
+                      onClick={toggleTheme}
+                      aria-label="Toggle theme"
+                      size="small"
+                      sx={{
+                        border: '1px solid',
+                        borderColor: (theme) => theme.palette.divider,
+                        backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.6)
+                      }}
+                    >
+                      {isLofiTheme ? <GitHub fontSize="small" /> : <GraphicEq fontSize="small" />}
+                    </IconButton>
+                  </Tooltip>
+                  <NotificationHighlightsDropdown
+                    reviewRequests={prsToReview}
+                    focusItems={focusItems}
+                    loading={prsLoading}
+                    onRefresh={() => {
+                      void refetchPrs();
                     }}
-                  >
-                    {isLofiTheme ? <GitHub fontSize="small" /> : <GraphicEq fontSize="small" />}
-                  </IconButton>
-                </Tooltip>
+                  />
+                </Box>
               </Box>
 
               {/* User Info Bar */}
