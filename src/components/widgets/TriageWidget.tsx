@@ -17,7 +17,9 @@ import {
   Badge,
   CircularProgress,
   Alert,
-  Button
+  Button,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import {
   PriorityHigh,
@@ -45,6 +47,7 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ selectedAuthor, onClearFilt
   const { user } = useAuth();
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Directly Assigned']));
+  const [showDrafts, setShowDrafts] = useState(false);
 
   // Fetch PRs to review
   const { data, loading, error, refetch } = useQuery(GET_PRS_TO_REVIEW, {
@@ -55,12 +58,18 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ selectedAuthor, onClearFilt
   const prsToReview = data?.prsToReview?.nodes || [];
 
   const filteredPRs = React.useMemo(() => {
-    if (!selectedAuthor) {
-      return prsToReview;
+    let visible = prsToReview;
+
+    if (!showDrafts) {
+      visible = visible.filter((pr: PullRequest) => !pr.isDraft);
     }
 
-    return prsToReview.filter((pr: PullRequest) => pr.author?.login === selectedAuthor);
-  }, [prsToReview, selectedAuthor]);
+    if (selectedAuthor) {
+      visible = visible.filter((pr: PullRequest) => pr.author?.login === selectedAuthor);
+    }
+
+    return visible;
+  }, [prsToReview, selectedAuthor, showDrafts]);
 
   const getStatusColor = (pr: PullRequest) => {
     const latestCommit = pr.commits.nodes[0];
@@ -221,9 +230,21 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ selectedAuthor, onClearFilt
           }}
         />
       </Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Pull requests waiting for your review
-      </Typography>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="body2" color="text.secondary">
+          Pull requests waiting for your review
+        </Typography>
+        <FormControlLabel
+          control={
+            <Switch
+              size="small"
+              checked={showDrafts}
+              onChange={(event) => setShowDrafts(event.target.checked)}
+            />
+          }
+          label="Show drafts"
+        />
+      </Box>
 
       {selectedAuthor && (
         <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -263,7 +284,8 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ selectedAuthor, onClearFilt
       ) : !hasFilteredPRs ? (
         <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            No review requests from @{selectedAuthor}.
+            {selectedAuthor ? `No review requests from @${selectedAuthor}.` : 'No review requests match your filters.'}
+            {!showDrafts && ' Drafts are hidden.'}
           </Typography>
           {onClearFilter && (
             <Button size="small" onClick={onClearFilter}>
