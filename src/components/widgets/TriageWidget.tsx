@@ -32,8 +32,6 @@ import {
   StarBorder
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
-import { useQuery } from '@apollo/client';
-import { GET_PRS_TO_REVIEW } from '../../apollo/queries';
 import { PullRequest } from '../../types/github';
 import { useAuth } from '../../context/AuthContext';
 import { useFocus } from '../../context/FocusContext';
@@ -42,23 +40,27 @@ import { useThemeMode } from '../../context/ThemeContext';
 interface TriageWidgetProps {
   selectedAuthor?: string | null;
   onClearFilter?: () => void;
+  prs: PullRequest[];
+  loading: boolean;
+  errorMessage?: string;
+  onRetry?: () => void;
 }
 
-const TriageWidget: React.FC<TriageWidgetProps> = ({ selectedAuthor, onClearFilter }) => {
+const TriageWidget: React.FC<TriageWidgetProps> = ({
+  selectedAuthor,
+  onClearFilter,
+  prs,
+  loading,
+  errorMessage,
+  onRetry
+}) => {
   const { user } = useAuth();
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Directly Assigned']));
   const [showDrafts, setShowDrafts] = useState(false);
   const { themeName } = useThemeMode();
   const isLofiTheme = themeName === 'lofi';
-
-  // Fetch PRs to review
-  const { data, loading, error, refetch } = useQuery(GET_PRS_TO_REVIEW, {
-    pollInterval: 300000, // Auto-refresh every 5 minutes
-    fetchPolicy: 'cache-and-network'
-  });
-
-  const prsToReview = data?.prsToReview?.nodes || [];
+  const prsToReview = prs || [];
 
   const filteredPRs = React.useMemo(() => {
     let visible = prsToReview;
@@ -271,12 +273,12 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ selectedAuthor, onClearFilt
         <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <CircularProgress />
         </Box>
-      ) : error ? (
+      ) : errorMessage ? (
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 2 }}>
           <Alert severity="error" sx={{ width: '100%' }}>
-            Failed to load PRs. {error.message}
+            Failed to load PRs. {errorMessage}
           </Alert>
-          <Button onClick={() => refetch()} variant="contained" size="small">
+          <Button onClick={() => onRetry?.()} variant="contained" size="small">
             Retry
           </Button>
         </Box>

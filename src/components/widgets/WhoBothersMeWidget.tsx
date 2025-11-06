@@ -15,8 +15,6 @@ import {
   Button
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { useQuery } from '@apollo/client';
-import { GET_PRS_TO_REVIEW } from '../../apollo/queries';
 import { PullRequest } from '../../types/github';
 import { useThemeMode } from '../../context/ThemeContext';
 
@@ -24,6 +22,10 @@ interface WhoBothersMeWidgetProps {
   selectedAuthor?: string | null;
   onSelectAuthor?: (author: string) => void;
   onClearFilter?: () => void;
+  prs: PullRequest[];
+  loading: boolean;
+  errorMessage?: string;
+  onRetry?: () => void;
 }
 
 interface AuthorReviewCount {
@@ -35,18 +37,17 @@ interface AuthorReviewCount {
 const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
   selectedAuthor,
   onSelectAuthor,
-  onClearFilter
+  onClearFilter,
+  prs,
+  loading,
+  errorMessage,
+  onRetry
 }) => {
   const { themeName } = useThemeMode();
   const isLofiTheme = themeName === 'lofi';
-  const { data, loading, error, refetch } = useQuery(GET_PRS_TO_REVIEW, {
-    pollInterval: 300000,
-    fetchPolicy: 'cache-and-network'
-  });
 
   const pendingByAuthor = React.useMemo<AuthorReviewCount[]>(() => {
     const counts = new Map<string, AuthorReviewCount>();
-    const prs: PullRequest[] = data?.prsToReview?.nodes || [];
 
     prs.forEach((pr) => {
       if (!pr?.author?.login) {
@@ -67,7 +68,7 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
     });
 
     return Array.from(counts.values()).sort((a, b) => b.count - a.count);
-  }, [data?.prsToReview?.nodes]);
+  }, [prs]);
 
   const totalRequests = React.useMemo(() => {
     return pendingByAuthor.reduce((sum, entry) => sum + entry.count, 0);
@@ -112,7 +113,7 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
           </Typography>
         )}
 
-        {loading && !data ? (
+        {loading && prs.length === 0 ? (
           <Box
             sx={{
               display: 'flex',
@@ -123,17 +124,17 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
           >
             <CircularProgress size={20} />
           </Box>
-        ) : error ? (
+        ) : errorMessage ? (
           <Alert
             severity="error"
             sx={{ mb: 1 }}
             action={
-              <Button color="inherit" size="small" onClick={() => refetch()}>
+              <Button color="inherit" size="small" onClick={() => onRetry?.()}>
                 Retry
               </Button>
             }
           >
-            Failed to load review requests. {error.message}
+            Failed to load review requests. {errorMessage}
           </Alert>
         ) : pendingByAuthor.length === 0 ? (
           <Typography variant="body2" color="text.secondary">

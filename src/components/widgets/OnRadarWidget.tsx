@@ -13,7 +13,9 @@ import {
   Divider,
   Alert,
   CircularProgress,
-  Button
+  Button,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import {
   Radar,
@@ -40,6 +42,7 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
   const { themeName } = useThemeMode();
   const isLofiTheme = themeName === 'lofi';
+  const [showDrafts, setShowDrafts] = React.useState(false);
 
   // Fetch involved PRs
   const { data, loading: isLoading, error, refetch } = useQuery(GET_INVOLVED_PRS, {
@@ -136,17 +139,30 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
   };
 
   // Sort PRs: ones with new commits since my review first, then by update date
-  const sortedPRs = [...validPRs].sort((a, b) => {
-    const aHasNew = hasNewCommitsSinceMyReview(a);
-    const bHasNew = hasNewCommitsSinceMyReview(b);
-    
-    if (aHasNew && !bHasNew) return -1;
-    if (!aHasNew && bHasNew) return 1;
-    
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-  });
+  const filteredPRs = React.useMemo(() => {
+    if (showDrafts) {
+      return validPRs;
+    }
+    return validPRs.filter(pr => !pr.isDraft);
+  }, [validPRs, showDrafts]);
 
-  const prsWithNewCommits = validPRs.filter(hasNewCommitsSinceMyReview);
+  const sortedPRs = React.useMemo(() => {
+    return [...filteredPRs].sort((a, b) => {
+      const aHasNew = hasNewCommitsSinceMyReview(a);
+      const bHasNew = hasNewCommitsSinceMyReview(b);
+      if (aHasNew && !bHasNew) return -1;
+      if (!aHasNew && bHasNew) return 1;
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+  }, [filteredPRs]);
+
+  const prsWithNewCommits = React.useMemo(
+    () => filteredPRs.filter(hasNewCommitsSinceMyReview),
+    [filteredPRs]
+  );
+
+  const hasAnyPRs = validPRs.length > 0;
+  const hasFilteredPRs = filteredPRs.length > 0;
 
   // Handle loading state
   if (isLoading) {
@@ -227,10 +243,22 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
           On My Radar
         </Typography>
       </Box>
-      
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        PRs you've reviewed or contributed to, with new activity highlighted
-      </Typography>
+
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="body2" color="text.secondary">
+          PRs you've reviewed or contributed to, with new activity highlighted
+        </Typography>
+        <FormControlLabel
+          control={
+            <Switch
+              size="small"
+              checked={showDrafts}
+              onChange={(event) => setShowDrafts(event.target.checked)}
+            />
+          }
+          label="Show drafts"
+        />
+      </Box>
 
       {prsWithNewCommits.length > 0 && (
         <Alert 
@@ -250,11 +278,18 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
         </Alert>
       )}
 
-      {validPRs.length === 0 ? (
-        <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {!hasFilteredPRs ? (
+        <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            👀 No PRs you're involved in
+            {hasAnyPRs
+              ? 'No PRs match your current filters. Drafts are hidden.'
+              : "👀 No PRs you're involved in"}
           </Typography>
+          {!showDrafts && hasAnyPRs && (
+            <Button size="small" onClick={() => setShowDrafts(true)}>
+              Show drafts
+            </Button>
+          )}
         </Box>
       ) : (
         <Box sx={{ flex: 1, overflow: 'auto', pr: 1, minHeight: 0 }}>

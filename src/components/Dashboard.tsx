@@ -9,6 +9,7 @@ import {
 import { alpha } from '@mui/material/styles';
 import { keyframes } from '@mui/system';
 import { Logout, GitHub, GraphicEq } from '@mui/icons-material';
+import { useQuery } from '@apollo/client';
 import { useAuth } from '../context/AuthContext';
 import { useThemeMode } from '../context/ThemeContext';
 import TriageWidget from './widgets/TriageWidget';
@@ -17,6 +18,8 @@ import OnRadarWidget from './widgets/OnRadarWidget';
 import FocusWidget from './widgets/FocusWidget';
 import LofiPlayer from './LofiPlayer';
 import WhoBothersMeWidget from './widgets/WhoBothersMeWidget';
+import { GET_PRS_TO_REVIEW } from '../apollo/queries';
+import type { PullRequest } from '../types/github';
 
 // Glitch keyframes for the Lo-files title
 const glitchMain = keyframes`
@@ -55,6 +58,11 @@ const Dashboard: React.FC = () => {
   const { themeName, toggleTheme } = useThemeMode();
   const isLofiTheme = themeName === 'lofi';
   const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
+  const { data: prsData, loading: prsLoading, error: prsError, refetch: refetchPrs } = useQuery(GET_PRS_TO_REVIEW, {
+    pollInterval: 300000,
+    fetchPolicy: 'cache-and-network'
+  });
+  const prsToReview = (prsData?.prsToReview?.nodes as PullRequest[]) ?? [];
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -67,6 +75,12 @@ const Dashboard: React.FC = () => {
             <TriageWidget 
               selectedAuthor={selectedAuthor}
               onClearFilter={() => setSelectedAuthor(null)}
+              prs={prsToReview}
+              loading={prsLoading}
+              errorMessage={prsError?.message}
+              onRetry={() => {
+                void refetchPrs();
+              }}
             />
           </Box>
 
@@ -257,6 +271,12 @@ const Dashboard: React.FC = () => {
                   setSelectedAuthor((current) => (current === author ? null : author));
                 }}
                 onClearFilter={() => setSelectedAuthor(null)}
+                prs={prsToReview}
+                loading={prsLoading}
+                errorMessage={prsError?.message}
+                onRetry={() => {
+                  void refetchPrs();
+                }}
               />
 
               {isLofiTheme && <LofiPlayer />}
