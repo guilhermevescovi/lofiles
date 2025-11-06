@@ -29,12 +29,15 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { useFocus } from '../../context/FocusContext';
 import { PullRequest } from '../../types/github';
+import { useThemeMode } from '../../context/ThemeContext';
 
 const FocusWidget: React.FC = () => {
   const { focusItems, addToFocus, removeFromFocus } = useFocus();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newItemUrl, setNewItemUrl] = useState('');
   const [newItemTitle, setNewItemTitle] = useState('');
+  const { themeName } = useThemeMode();
+  const isLofiTheme = themeName === 'lofi';
 
   const parseGitHubUrl = (url: string): { type: 'pr' | 'issue'; repository: string; number: number } | null => {
     // Match GitHub PR or issue URLs
@@ -104,10 +107,10 @@ const FocusWidget: React.FC = () => {
             variant="h6" 
             component="h2"
             sx={{
-              fontFamily: '"Press Start 2P", "Courier New", monospace',
+              fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
               fontSize: '18px',
-              textShadow: '2px 2px 0px #4CA1A3',
-              color: '#ffffff',
+              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              color: (theme) => theme.palette.text.primary,
               letterSpacing: '1px'
             }}
           >

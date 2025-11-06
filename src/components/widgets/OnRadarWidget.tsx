@@ -30,6 +30,7 @@ import { useQuery } from '@apollo/client';
 import { GET_INVOLVED_PRS } from '../../apollo/queries';
 import { PullRequest } from '../../types/github';
 import { useFocus } from '../../context/FocusContext';
+import { useThemeMode } from '../../context/ThemeContext';
 
 interface OnRadarWidgetProps {
   // No props needed - widget fetches its own data
@@ -37,6 +38,8 @@ interface OnRadarWidgetProps {
 
 const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
+  const { themeName } = useThemeMode();
+  const isLofiTheme = themeName === 'lofi';
 
   // Fetch involved PRs
   const { data, loading: isLoading, error, refetch } = useQuery(GET_INVOLVED_PRS, {
@@ -154,10 +157,10 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
             variant="h6" 
             component="h2"
             sx={{
-              fontFamily: '"Press Start 2P", "Courier New", monospace',
+              fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
               fontSize: '18px',
-              textShadow: '2px 2px 0px #4CA1A3',
-              color: '#ffffff',
+              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              color: (theme) => theme.palette.text.primary,
               letterSpacing: '1px'
             }}
           >
@@ -181,10 +184,10 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
             variant="h6" 
             component="h2"
             sx={{
-              fontFamily: '"Press Start 2P", "Courier New", monospace',
+              fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
               fontSize: '18px',
-              textShadow: '2px 2px 0px #4CA1A3',
-              color: '#ffffff',
+              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              color: (theme) => theme.palette.text.primary,
               letterSpacing: '1px'
             }}
           >
@@ -214,10 +217,10 @@ const OnRadarWidget: React.FC<OnRadarWidgetProps> = () => {
           variant="h6" 
           component="h2"
           sx={{
-            fontFamily: '"Press Start 2P", "Courier New", monospace',
+            fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
             fontSize: '18px',
-            textShadow: '2px 2px 0px #4CA1A3',
-            color: '#ffffff',
+            textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+            color: (theme) => theme.palette.text.primary,
             letterSpacing: '1px'
           }}
         >

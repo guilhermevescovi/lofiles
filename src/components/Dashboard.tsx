@@ -3,12 +3,14 @@ import {
   Typography,
   Avatar,
   IconButton,
-  Box
+  Box,
+  Tooltip
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { keyframes } from '@mui/system';
-import { Logout } from '@mui/icons-material';
+import { Logout, GitHub, GraphicEq } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import { useThemeMode } from '../context/ThemeContext';
 import TriageWidget from './widgets/TriageWidget';
 import InFlightWidget from './widgets/InFlightWidget';
 import OnRadarWidget from './widgets/OnRadarWidget';
@@ -50,13 +52,16 @@ const glitchAfter = keyframes`
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const { themeName, toggleTheme } = useThemeMode();
+  const isLofiTheme = themeName === 'lofi';
   const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Main Dashboard Content */}
       <Box sx={{ flex: 1, overflow: 'hidden', p: 3 }}>
-        <Box sx={{ display: 'flex', gap: 3, height: '100%' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+          <Box sx={{ display: 'flex', gap: 3, flex: 1, minHeight: 0 }}>
           {/* Column 1: Triage Widget - Most Critical */}
           <Box sx={{ flex: '1 1 300px', minWidth: '300px', height: '100%' }}>
             <TriageWidget 
@@ -77,19 +82,21 @@ const Dashboard: React.FC = () => {
             </Box>
             
             {/* Cat Sticker between My stuff and Focus for Today */}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-              <Box 
-                component="img" 
-                src={`${process.env.PUBLIC_URL}/assets/cat-sticker.gif`} 
-                alt="Cat Sticker"
-                sx={{
-                  height: 'auto',
-                  maxHeight: '50px',
-                  objectFit: 'contain',
-                  borderRadius: '8px'
-                }}
-              />
-            </Box>
+            {isLofiTheme && (
+              <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <Box 
+                  component="img" 
+                  src={`${process.env.PUBLIC_URL}/assets/cat-sticker.gif`} 
+                  alt="Cat Sticker"
+                  sx={{
+                    height: 'auto',
+                    maxHeight: '50px',
+                    objectFit: 'contain',
+                    borderRadius: '8px'
+                  }}
+                />
+              </Box>
+            )}
             
             <Box sx={{ height: 'calc(40% - 12px)' }}>
               <FocusWidget />
@@ -108,27 +115,30 @@ const Dashboard: React.FC = () => {
             {/* Container to match GIF width */}
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'center', height: '100%' }}>
               {/* GIF Display - renders first to determine width */}
-              <Box 
-                component="img" 
-                src={`${process.env.PUBLIC_URL}/assets/dashboard-animation.gif`} 
-                alt="Cozy Coding Animation"
-                sx={{
-                  height: 'auto',
-                  maxHeight: '400px',
-                  objectFit: 'contain',
-                  borderRadius: '12px',
-                  order: 2
-                }}
-              />
+              {isLofiTheme && (
+                <Box 
+                  component="img" 
+                  src={`${process.env.PUBLIC_URL}/assets/dashboard-animation.gif`} 
+                  alt="Cozy Coding Animation"
+                  sx={{
+                    height: 'auto',
+                    maxHeight: '400px',
+                    objectFit: 'contain',
+                    borderRadius: '12px',
+                    order: 2
+                  }}
+                />
+              )}
               
               {/* Pixel title above user card */}
-              <Box sx={{ alignSelf: 'flex-end', order: 0, mb: 1, width: '100%' }}>
+              <Box sx={{ alignSelf: 'flex-end', order: 0, mb: 1, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                <Box sx={{ flex: 1 }} />
                 <Typography 
                   variant="caption" 
                   sx={{ 
-                    fontFamily: '"Press Start 2P", "Courier New", monospace',
+                    fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
                     fontSize: '28px',
-                    textShadow: '3px 3px 0px #4CA1A3',
+                    textShadow: isLofiTheme ? '3px 3px 0px #4CA1A3' : 'none',
                     color: '#ffffff',
                     letterSpacing: '0.5px',
                     lineHeight: 1.2,
@@ -136,31 +146,50 @@ const Dashboard: React.FC = () => {
                     textAlign: 'right',
                     position: 'relative',
                     display: 'inline-block',
-                    animation: `${glitchMain} 2.2s infinite`,
-                    '&::before': {
-                      content: '"Lo-files"',
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      color: '#ffffff',
-                      textShadow: '3px 0 rgb(204, 0, 255)',
-                      animation: `${glitchBefore} 2s infinite`,
-                      pointerEvents: 'none'
-                    },
-                    '&::after': {
-                      content: '"Lo-files"',
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      color: '#ffffff',
-                      textShadow: '-3px 0 #00fff9',
-                      animation: `${glitchAfter} 2.4s infinite`,
-                      pointerEvents: 'none'
-                    }
+                    animation: isLofiTheme ? `${glitchMain} 2.2s infinite` : 'none',
+                    ...(isLofiTheme
+                      ? {
+                          '&::before': {
+                            content: '"Lo-files"',
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            color: '#ffffff',
+                            textShadow: '3px 0 rgb(204, 0, 255)',
+                            animation: `${glitchBefore} 2s infinite`,
+                            pointerEvents: 'none'
+                          },
+                          '&::after': {
+                            content: '"Lo-files"',
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            color: '#ffffff',
+                            textShadow: '-3px 0 #00fff9',
+                            animation: `${glitchAfter} 2.4s infinite`,
+                            pointerEvents: 'none'
+                          }
+                        }
+                      : {})
                   }}
                 >
                   Lo-files
                 </Typography>
+                <Tooltip title={isLofiTheme ? 'Switch to GitHub Dark theme' : 'Switch to Lo-fi vibe theme'}>
+                  <IconButton
+                    color="inherit"
+                    onClick={toggleTheme}
+                    aria-label="Toggle theme"
+                    size="small"
+                    sx={{
+                      border: '1px solid',
+                      borderColor: (theme) => theme.palette.divider,
+                      backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.6)
+                    }}
+                  >
+                    {isLofiTheme ? <GitHub fontSize="small" /> : <GraphicEq fontSize="small" />}
+                  </IconButton>
+                </Tooltip>
               </Box>
 
               {/* User Info Bar */}
@@ -187,9 +216,9 @@ const Dashboard: React.FC = () => {
                   <Typography 
                     variant="caption" 
                     sx={{ 
-                      fontFamily: '"Press Start 2P", "Courier New", monospace',
+                      fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
                       fontSize: '12px',
-                      textShadow: '1px 1px 0px #4CA1A3',
+                      textShadow: isLofiTheme ? '1px 1px 0px #4CA1A3' : 'none',
                       color: '#ffffff',
                       letterSpacing: '0.5px',
                       lineHeight: 1.2,
@@ -224,14 +253,15 @@ const Dashboard: React.FC = () => {
 
               <WhoBothersMeWidget 
                 selectedAuthor={selectedAuthor}
-                onSelectAuthor={(author) => {
+                onSelectAuthor={(author: string) => {
                   setSelectedAuthor((current) => (current === author ? null : author));
                 }}
                 onClearFilter={() => setSelectedAuthor(null)}
               />
 
-              <LofiPlayer />
+              {isLofiTheme && <LofiPlayer />}
             </Box>
+          </Box>
           </Box>
         </Box>
       </Box>

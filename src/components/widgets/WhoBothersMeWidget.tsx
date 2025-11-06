@@ -18,6 +18,7 @@ import { alpha } from '@mui/material/styles';
 import { useQuery } from '@apollo/client';
 import { GET_PRS_TO_REVIEW } from '../../apollo/queries';
 import { PullRequest } from '../../types/github';
+import { useThemeMode } from '../../context/ThemeContext';
 
 interface WhoBothersMeWidgetProps {
   selectedAuthor?: string | null;
@@ -36,6 +37,8 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
   onSelectAuthor,
   onClearFilter
 }) => {
+  const { themeName } = useThemeMode();
+  const isLofiTheme = themeName === 'lofi';
   const { data, loading, error, refetch } = useQuery(GET_PRS_TO_REVIEW, {
     pollInterval: 300000,
     fetchPolicy: 'cache-and-network'
@@ -77,8 +80,8 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
         mt: 2,
         width: '100%',
         order: 3,
-        backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.4),
-        border: '1px solid rgba(76, 161, 163, 0.2)',
+        backgroundColor: (theme) => theme.palette.background.paper,
+        border: (theme) => `1px solid ${theme.palette.divider}`,
         borderRadius: '12px',
         boxShadow: 'none'
       }}
@@ -89,8 +92,9 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
             variant="subtitle2"
             sx={{
               fontWeight: 600,
-              fontFamily: '"Press Start 2P", "Courier New", monospace',
-              fontSize: '12px'
+              fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
+              fontSize: '12px',
+              color: (theme) => theme.palette.text.primary
             }}
           >
             Who bothers me
@@ -148,12 +152,12 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
                       py: 0.5,
                       borderRadius: 1,
                       '&:hover': {
-                        backgroundColor: 'rgba(76, 161, 163, 0.1)'
+                        backgroundColor: (theme) => theme.palette.action.hover
                       },
                       '&.Mui-selected': {
-                        backgroundColor: 'rgba(76, 161, 163, 0.2)',
+                        backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.16),
                         '&:hover': {
-                          backgroundColor: 'rgba(76, 161, 163, 0.25)'
+                          backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.24)
                         }
                       }
                     }}
@@ -164,8 +168,13 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
                     <ListItemText
                       primary={
                         <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
-                          <Typography variant="body2">@{login}</Typography>
-                          <Typography variant="body2" color="text.secondary">
+                        <Typography
+                          variant="body2"
+                          sx={{ color: (theme) => theme.palette.text.primary }}
+                        >
+                          @{login}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
                             {count}
                           </Typography>
                         </Box>

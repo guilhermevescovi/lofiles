@@ -33,6 +33,7 @@ import { useQuery } from '@apollo/client';
 import { GET_MY_WORK } from '../../apollo/queries';
 import { PullRequest, Issue } from '../../types/github';
 import { useFocus } from '../../context/FocusContext';
+import { useThemeMode } from '../../context/ThemeContext';
 
 interface InFlightWidgetProps {
   // No props needed - widget fetches its own data
@@ -41,6 +42,8 @@ interface InFlightWidgetProps {
 const InFlightWidget: React.FC<InFlightWidgetProps> = () => {
   const [tabValue, setTabValue] = React.useState(0);
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
+  const { themeName } = useThemeMode();
+  const isLofiTheme = themeName === 'lofi';
 
   // Fetch my work (PRs and issues)
   const { data, loading, error, refetch } = useQuery(GET_MY_WORK, {
@@ -139,10 +142,10 @@ const InFlightWidget: React.FC<InFlightWidgetProps> = () => {
           variant="h6"
           component="h2"
           sx={{
-            fontFamily: '"Press Start 2P", "Courier New", monospace',
+            fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
             fontSize: '18px',
-            textShadow: '2px 2px 0px #4CA1A3',
-            color: '#ffffff',
+            textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+            color: (theme) => theme.palette.text.primary,
             letterSpacing: '1px'
           }}
         >

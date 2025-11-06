@@ -1,40 +1,42 @@
 import React from 'react';
 import { ApolloProvider } from '@apollo/client';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { Theme } from '@mui/material/styles';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FocusProvider } from './context/FocusContext';
+import { ThemeModeProvider, useThemeMode, ThemeName } from './context/ThemeContext';
 import { apolloClient } from './apollo/client';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import './App.css';
 
-const theme = createTheme({
+const lofiTheme = createTheme({
   palette: {
     mode: 'dark',
     background: {
-      default: '#21094E', // Main background
-      paper: '#511281',   // Card/widget backgrounds
+      default: '#21094E',
+      paper: '#511281',
     },
     primary: {
-      main: '#4CA1A3',    // Accent secondary (teal)
+      main: '#4CA1A3',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#A5E1AD',    // Accent highlights (light green)
+      main: '#A5E1AD',
       contrastText: '#21094E',
     },
     info: {
-      main: '#4CA1A3',    // Teal for info elements
+      main: '#4CA1A3',
     },
     success: {
-      main: '#A5E1AD',    // Light green for success
+      main: '#A5E1AD',
       contrastText: '#21094E',
     },
     warning: {
-      main: '#FFB366',    // Warm orange for warnings
+      main: '#FFB366',
     },
     error: {
-      main: '#FF6B6B',    // Soft red for errors
+      main: '#FF6B6B',
     },
     text: {
       primary: '#ffffff',
@@ -50,12 +52,24 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: '#21094E',
+          backgroundImage: 'none',
+          color: '#ffffff',
+        },
+        '#root': {
+          backgroundColor: '#21094E',
+        },
+      },
+    },
     MuiPaper: {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
           borderRadius: 12,
-          border: '1px solid rgba(76, 161, 163, 0.2)', // Subtle teal border
+          border: '1px solid rgba(76, 161, 163, 0.2)',
         },
       },
     },
@@ -117,6 +131,144 @@ const theme = createTheme({
   },
 });
 
+const githubDarkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    background: {
+      default: '#0d1117',
+      paper: '#161b22',
+    },
+    primary: {
+      main: '#1f6feb',
+      contrastText: '#f0f6fc',
+    },
+    secondary: {
+      main: '#58a6ff',
+      contrastText: '#0d1117',
+    },
+    info: {
+      main: '#58a6ff',
+    },
+    success: {
+      main: '#3fb950',
+      contrastText: '#0d1117',
+    },
+    warning: {
+      main: '#d29922',
+    },
+    error: {
+      main: '#f85149',
+    },
+    text: {
+      primary: '#c9d1d9',
+      secondary: '#8b949e',
+    },
+    divider: '#30363d',
+  },
+  typography: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    h6: {
+      fontWeight: 600,
+      color: '#c9d1d9',
+    },
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: '#0d1117',
+          backgroundImage: 'none',
+          color: '#c9d1d9',
+        },
+        '#root': {
+          backgroundColor: '#0d1117',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          borderRadius: 12,
+          border: '1px solid #30363d',
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        contained: {
+          borderRadius: 8,
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: 'none',
+          },
+        },
+        outlined: {
+          borderRadius: 8,
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          color: '#8b949e',
+          '&.Mui-selected': {
+            color: '#1f6feb',
+          },
+        },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        indicator: {
+          backgroundColor: '#1f6feb',
+        },
+      },
+    },
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          border: '1px solid #30363d',
+        },
+      },
+    },
+    MuiListItem: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: 'rgba(31, 111, 235, 0.08)',
+          },
+        },
+      },
+    },
+  },
+});
+
+const themeMap: Record<ThemeName, Theme> = {
+  lofi: lofiTheme,
+  githubDark: githubDarkTheme,
+};
+
+const ThemeBridge: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { themeName } = useThemeMode();
+  const theme = themeMap[themeName];
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
+  );
+};
+
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -142,14 +294,15 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <ApolloProvider client={apolloClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AuthProvider>
-          <FocusProvider>
-            <AppContent />
-          </FocusProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <ThemeModeProvider>
+        <ThemeBridge>
+          <AuthProvider>
+            <FocusProvider>
+              <AppContent />
+            </FocusProvider>
+          </AuthProvider>
+        </ThemeBridge>
+      </ThemeModeProvider>
     </ApolloProvider>
   );
 }

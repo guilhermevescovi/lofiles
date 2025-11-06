@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, IconButton, Slider, Typography, Paper } from '@mui/material';
 import { PlayArrow, Pause, VolumeUp, VolumeOff, Album } from '@mui/icons-material';
 import { alpha, keyframes } from '@mui/material/styles';
+import { useThemeMode } from '../context/ThemeContext';
 
 const LOCAL_STORAGE_VOLUME_KEY = 'lofi_player_volume_v1';
 const LOCAL_STORAGE_MUTED_KEY = 'lofi_player_muted_v1';
@@ -101,6 +102,9 @@ const LofiPlayer: React.FC = () => {
     if (muted && next > 0) setMuted(false);
   };
 
+  const { themeName } = useThemeMode();
+  const isLofiTheme = themeName === 'lofi';
+
   return (
     <Paper 
       elevation={0} 
@@ -108,8 +112,8 @@ const LofiPlayer: React.FC = () => {
         mt: 'auto', 
         mb: 0,
         width: '100%',
-        backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.4), 
-        border: '1px solid rgba(76, 161, 163, 0.2)', 
+        backgroundColor: (theme) => theme.palette.background.paper,
+        border: (theme) => `1px solid ${theme.palette.divider}`,
         borderRadius: '12px', 
         boxShadow: 'none', 
         order: 5,
@@ -125,7 +129,7 @@ const LofiPlayer: React.FC = () => {
               color: (theme) => alpha(theme.palette.text.primary, 0.8),
               animation: isPlaying ? `${spin} 3s linear infinite` : 'none',
               transition: 'all 0.3s ease-in-out',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
             }} 
           />
           
@@ -187,24 +191,24 @@ const LofiPlayer: React.FC = () => {
         
         {/* Content Section */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1.5, minHeight: 80, justifyContent: 'center' }}>
-                     <Typography 
-             variant="h6" 
-             sx={{ 
-               fontFamily: '"Press Start 2P", "Courier New", monospace',
-               fontSize: '12px',
-               textShadow: '1px 1px 0px #4CA1A3',
-               color: '#ffffff',
-               letterSpacing: '0.5px',
-               lineHeight: 1.2
-             }}
-           >
-             Lofi beats
-           </Typography>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
+              fontSize: '12px',
+              textShadow: (theme) => isLofiTheme ? `1px 1px 0px ${alpha(theme.palette.primary.main, 0.8)}` : 'none',
+              color: (theme) => theme.palette.text.primary,
+              letterSpacing: '0.5px',
+              lineHeight: 1.2
+            }}
+          >
+            Lofi beats
+          </Typography>
            
            <Typography 
              variant="body2" 
              sx={{ 
-               color: 'rgba(255, 255, 255, 0.7)',
+              color: (theme) => theme.palette.text.secondary,
                fontSize: '11px',
                fontStyle: 'italic',
                lineHeight: 1.2

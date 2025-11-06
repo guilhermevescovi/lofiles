@@ -37,6 +37,7 @@ import { GET_PRS_TO_REVIEW } from '../../apollo/queries';
 import { PullRequest } from '../../types/github';
 import { useAuth } from '../../context/AuthContext';
 import { useFocus } from '../../context/FocusContext';
+import { useThemeMode } from '../../context/ThemeContext';
 
 interface TriageWidgetProps {
   selectedAuthor?: string | null;
@@ -48,6 +49,8 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ selectedAuthor, onClearFilt
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Directly Assigned']));
   const [showDrafts, setShowDrafts] = useState(false);
+  const { themeName } = useThemeMode();
+  const isLofiTheme = themeName === 'lofi';
 
   // Fetch PRs to review
   const { data, loading, error, refetch } = useQuery(GET_PRS_TO_REVIEW, {
@@ -209,26 +212,28 @@ const TriageWidget: React.FC<TriageWidgetProps> = ({ selectedAuthor, onClearFilt
           variant="h6" 
           component="h2"
           sx={{
-            fontFamily: '"Press Start 2P", "Courier New", monospace',
+            fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
             fontSize: '18px',
-            textShadow: '2px 2px 0px #4CA1A3',
-            color: '#ffffff',
+            textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+            color: (theme) => theme.palette.text.primary,
             letterSpacing: '1px'
           }}
         >
           Review Requests
         </Typography>
-        <Box 
-          component="img" 
-          src={`${process.env.PUBLIC_URL}/assets/internet-running.gif`} 
-          alt="Internet Running"
-          sx={{
-            height: 'auto',
-            maxHeight: '48px',
-            objectFit: 'contain',
-            borderRadius: '4px'
-          }}
-        />
+        {isLofiTheme && (
+          <Box 
+            component="img" 
+            src={`${process.env.PUBLIC_URL}/assets/internet-running.gif`} 
+            alt="Internet Running"
+            sx={{
+              height: 'auto',
+              maxHeight: '48px',
+              objectFit: 'contain',
+              borderRadius: '4px'
+            }}
+          />
+        )}
       </Box>
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
         <Typography variant="body2" color="text.secondary">
