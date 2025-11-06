@@ -43,6 +43,7 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
   const { themeName } = useThemeMode();
   const isLofiTheme = themeName === 'lofi';
   const [showDrafts, setShowDrafts] = React.useState(false);
+  const [cachedPRs, setCachedPRs] = React.useState<PullRequest[]>([]);
 
   // Fetch involved PRs
   const { data, loading: isLoading, error, refetch } = useQuery(GET_INVOLVED_PRS, {
@@ -76,6 +77,15 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
     
     return valid;
   }, [involvedPRs]);
+
+  React.useEffect(() => {
+    if (validPRs.length > 0) {
+      setCachedPRs(validPRs as PullRequest[]);
+    }
+  }, [validPRs]);
+
+  const basePRs = validPRs.length > 0 ? validPRs : cachedPRs;
+  const isStaleData = validPRs.length === 0 && cachedPRs.length > 0 && !isLoading;
   const getMyLastReviewDate = (pr: PullRequest) => {
     const myReviews = pr.reviews.nodes.filter(review => review.author.login === currentUser);
     return myReviews.length > 0 ? myReviews[myReviews.length - 1].submittedAt : null;
@@ -141,10 +151,10 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
   // Sort PRs: ones with new commits since my review first, then by update date
   const filteredPRs = React.useMemo(() => {
     if (showDrafts) {
-      return validPRs;
+      return basePRs;
     }
-    return validPRs.filter(pr => !pr.isDraft);
-  }, [validPRs, showDrafts]);
+    return basePRs.filter(pr => !pr.isDraft);
+  }, [basePRs, showDrafts]);
 
   const sortedPRs = React.useMemo(() => {
     return [...filteredPRs].sort((a, b) => {
@@ -161,7 +171,7 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
     [filteredPRs]
   );
 
-  const hasAnyPRs = validPRs.length > 0;
+  const hasAnyPRs = basePRs.length > 0;
   const hasFilteredPRs = filteredPRs.length > 0;
 
   // Handle loading state
@@ -275,6 +285,12 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
           <Typography variant="body2">
             <strong>{prsWithNewCommits.length}</strong> PR{prsWithNewCommits.length > 1 ? 's have' : ' has'} new commits since your last review!
           </Typography>
+        </Alert>
+      )}
+
+      {isStaleData && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Showing the last known radar results while GitHub data refreshes.
         </Alert>
       )}
 

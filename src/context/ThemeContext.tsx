@@ -14,11 +14,11 @@ const STORAGE_KEY = 'lofiles:theme';
 
 const getInitialTheme = (): ThemeName => {
   if (typeof window === 'undefined') {
-    return 'lofi';
+    return 'githubDark';
   }
 
   const stored = window.localStorage.getItem(STORAGE_KEY);
-  return stored === 'githubDark' || stored === 'lofi' ? stored : 'lofi';
+  return stored === 'githubDark' || stored === 'lofi' ? stored : 'githubDark';
 };
 
 interface ThemeModeProviderProps {
