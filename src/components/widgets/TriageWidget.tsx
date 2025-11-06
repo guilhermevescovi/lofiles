@@ -37,10 +37,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useFocus } from '../../context/FocusContext';
 
 interface TriageWidgetProps {
-  // No props needed - widget fetches its own data
+  selectedAuthor?: string | null;
+  onClearFilter?: () => void;
 }
 
-const TriageWidget: React.FC<TriageWidgetProps> = () => {
+const TriageWidget: React.FC<TriageWidgetProps> = ({ selectedAuthor, onClearFilter }) => {
   const { user } = useAuth();
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Directly Assigned']));
@@ -52,6 +53,14 @@ const TriageWidget: React.FC<TriageWidgetProps> = () => {
   });
 
   const prsToReview = data?.prsToReview?.nodes || [];
+
+  const filteredPRs = React.useMemo(() => {
+    if (!selectedAuthor) {
+      return prsToReview;
+    }
+
+    return prsToReview.filter((pr: PullRequest) => pr.author?.login === selectedAuthor);
+  }, [prsToReview, selectedAuthor]);
 
   const getStatusColor = (pr: PullRequest) => {
     const latestCommit = pr.commits.nodes[0];
@@ -108,10 +117,10 @@ const TriageWidget: React.FC<TriageWidgetProps> = () => {
   };
 
   // Group PRs by review assignment type and sort by last updated
-  const groupPRsByAssignment = () => {
+  const groupPRsByAssignment = (pullRequests: PullRequest[]) => {
     const groups: { [key: string]: { prs: PullRequest[], isDirect: boolean } } = {};
 
-    prsToReview.forEach((pr: PullRequest) => {
+    pullRequests.forEach((pr: PullRequest) => {
       let isDirectlyAssigned = false;
       const assignmentTypes = new Set<string>();
 
@@ -179,7 +188,9 @@ const TriageWidget: React.FC<TriageWidgetProps> = () => {
     });
   };
 
-  const groupedPRs = groupPRsByAssignment();
+  const groupedPRs = groupPRsByAssignment(filteredPRs);
+  const hasAnyPRs = prsToReview.length > 0;
+  const hasFilteredPRs = filteredPRs.length > 0;
 
 
   return (
@@ -214,6 +225,22 @@ const TriageWidget: React.FC<TriageWidgetProps> = () => {
         Pull requests waiting for your review
       </Typography>
 
+      {selectedAuthor && (
+        <Box display="flex" alignItems="center" gap={1} mb={2}>
+          <Chip 
+            label={`Filtering by @${selectedAuthor}`}
+            size="small"
+            color="primary"
+            variant="outlined"
+          />
+          {onClearFilter && (
+            <Button size="small" onClick={onClearFilter}>
+              Clear
+            </Button>
+          )}
+        </Box>
+      )}
+
       {loading && prsToReview.length === 0 ? (
         <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <CircularProgress />
@@ -227,11 +254,22 @@ const TriageWidget: React.FC<TriageWidgetProps> = () => {
             Retry
           </Button>
         </Box>
-      ) : prsToReview.length === 0 ? (
+      ) : !hasAnyPRs ? (
         <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Typography variant="body2" color="text.secondary">
             🎉 No PRs waiting for your review!
           </Typography>
+        </Box>
+      ) : !hasFilteredPRs ? (
+        <Box textAlign="center" py={4} sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            No review requests from @{selectedAuthor}.
+          </Typography>
+          {onClearFilter && (
+            <Button size="small" onClick={onClearFilter}>
+              Clear filter
+            </Button>
+          )}
         </Box>
       ) : (
         <Box sx={{ flex: 1, overflow: 'auto', pr: 1, minHeight: 0 }}>

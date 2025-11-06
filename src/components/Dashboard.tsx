@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Typography,
   Avatar,
@@ -14,6 +14,7 @@ import InFlightWidget from './widgets/InFlightWidget';
 import OnRadarWidget from './widgets/OnRadarWidget';
 import FocusWidget from './widgets/FocusWidget';
 import LofiPlayer from './LofiPlayer';
+import WhoBothersMeWidget from './widgets/WhoBothersMeWidget';
 
 // Glitch keyframes for the Lo-files title
 const glitchMain = keyframes`
@@ -49,6 +50,7 @@ const glitchAfter = keyframes`
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -57,7 +59,10 @@ const Dashboard: React.FC = () => {
         <Box sx={{ display: 'flex', gap: 3, height: '100%' }}>
           {/* Column 1: Triage Widget - Most Critical */}
           <Box sx={{ flex: '1 1 300px', minWidth: '300px', height: '100%' }}>
-            <TriageWidget />
+            <TriageWidget 
+              selectedAuthor={selectedAuthor}
+              onClearFilter={() => setSelectedAuthor(null)}
+            />
           </Box>
 
           {/* Column 2: On My Radar Widget - Context Tracking */}
@@ -216,6 +221,14 @@ const Dashboard: React.FC = () => {
                 <Logout fontSize="small" />
               </IconButton>
               </Box>
+
+              <WhoBothersMeWidget 
+                selectedAuthor={selectedAuthor}
+                onSelectAuthor={(author) => {
+                  setSelectedAuthor((current) => (current === author ? null : author));
+                }}
+                onClearFilter={() => setSelectedAuthor(null)}
+              />
 
               <LofiPlayer />
             </Box>
