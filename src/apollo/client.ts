@@ -1,26 +1,14 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
-import { GITHUB_CONFIG } from '../config/github';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 
 const httpLink = createHttpLink({
-  uri: GITHUB_CONFIG.API_URL,
-});
-
-const authLink = setContext((_, { headers }) => {
-  // Get the authentication token from localStorage
-  const token = localStorage.getItem('github_token');
-  
-  // Return the headers to the context so httpLink can read them
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    }
-  }
+  uri: `${BACKEND_URL}/graphql`,
+  credentials: 'include', // Important: send cookies with requests
 });
 
 export const apolloClient = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: httpLink,
   cache: new InMemoryCache({
     typePolicies: {
       Query: {

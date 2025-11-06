@@ -5,13 +5,20 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        # Pass GitHub Personal Access Token for automatic authentication
-        # React will only inline vars prefixed with REACT_APP_
-        REACT_APP_GITHUB_TOKEN: ${REACT_APP_GITHUB_TOKEN}
-    image: github-workday-dashboard:latest
+        # Backend URL for OAuth flow (defaults to same host in production)
+        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL}
+    image: lofiles-dashboard:latest
     ports:
-      - "${APP_PORT:-3003}:80"
+      - "${APP_PORT:-3001}:3001"
     environment:
-      # Runtime envs won't affect CRA bundle; listed here for clarity if needed later
       - NODE_ENV=production
+      # GitHub OAuth App credentials (required)
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      # Session secret (required, use a random string)
+      - SESSION_SECRET=${SESSION_SECRET}
+      # Frontend URL for CORS and OAuth redirects
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3001}
+      # Backend port
+      - PORT=3001
 

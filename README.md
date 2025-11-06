@@ -53,64 +53,90 @@ A single-pane-of-glass dashboard that cuts through the noise of GitHub notificat
    npm install
    ```
 
-2. **For the demo version (easiest):**
+2. **Create GitHub OAuth App:**
+   - Go to [GitHub Settings > Developer settings > OAuth Apps](https://github.com/settings/developers)
+   - Click **"New OAuth App"**
+   - Fill in the details:
+     - **Application name:** lofiles-dashboard (or your preferred name)
+     - **Homepage URL:** `http://localhost:3001` (or your production domain)
+     - **Authorization callback URL:** `http://localhost:3001/auth/callback`
+   - Click **"Register application"**
+   - Copy the **Client ID**
+   - Generate and copy the **Client Secret**
+
+3. **Configure environment variables:**
+   ```bash
+   cp .env.example .env
+   ```
+
+   Edit `.env` and set:
+   ```bash
+   GITHUB_CLIENT_ID=your_client_id_here
+   GITHUB_CLIENT_SECRET=your_client_secret_here
+   SESSION_SECRET=$(openssl rand -hex 32)
+   FRONTEND_URL=http://localhost:3001
+   PORT=3001
+   REACT_APP_BACKEND_URL=http://localhost:3001
+   ```
+
+4. **Install and run backend:**
+   ```bash
+   cd server
+   npm install
+   npm run dev
+   ```
+   Backend will start on port 3001.
+
+5. **In a new terminal, run frontend (development):**
    ```bash
    npm start
    ```
-   - The app will prompt for a GitHub Personal Access Token
-   - Go to [GitHub Settings > Personal access tokens](https://github.com/settings/tokens)
-   - Generate a token with the following scopes:
-     - `repo` - Access to repositories
-     - `read:user` - Read user profile information
-     - `read:org` - Read organization and team information (required for team review assignments)
-     - `read:discussion` - Read discussions (required for advanced team features)
-   - Paste it when prompted in the app
+   Frontend will start on port 3000 and proxy API calls to backend on port 3001.
 
-3. **For automatic authentication (recommended):**
-   - Create `.env` file: `cp .env.example .env`
-   - Add your GitHub Personal Access Token to `.env`:
-     ```bash
-     REACT_APP_GITHUB_TOKEN=your_github_personal_access_token_here
-     ```
-   - Run `npm start` - the app will automatically authenticate using your token
-   - No more manual token entry prompts!
+6. **Access the app:**
+   - Open `http://localhost:3000`
+   - Click **"Sign in with GitHub"**
+   - Authorize the application
+   - You'll be redirected back and logged in automatically
 
-4. **For full OAuth setup (production):**
-   - Go to [GitHub Settings > OAuth Apps](https://github.com/settings/applications/new)
-   - Set **Authorization callback URL** to: `http://localhost:3000/callback`
-   - Copy the Client ID
-   - Add to your `.env` file:
-     ```bash
-     REACT_APP_GITHUB_CLIENT_ID=your_github_client_id_here
-     REACT_APP_REDIRECT_URI=http://localhost:3000/callback
-     ```
+### Required GitHub OAuth Scopes
+
+The app requests these scopes during OAuth:
+- `repo` - Access to repositories
+- `read:user` - Read user profile information
+- `read:org` - Read organization and team information (required for team review assignments)
+- `read:discussion` - Read discussions (required for advanced features)
 
 ## 🐳 Docker Setup
 
 ### Quick Start with Docker
 
-1. **Build and run with Docker Compose:**
+1. **Set up environment variables:**
    ```bash
-   docker compose up -d
+   cp .env.example .env
    ```
-   - App will be available at `http://localhost:3003`
 
-2. **Custom port:**
+   Edit `.env` with your GitHub OAuth credentials and session secret:
    ```bash
-   APP_PORT=4000 docker compose up -d
+   GITHUB_CLIENT_ID=your_client_id_here
+   GITHUB_CLIENT_SECRET=your_client_secret_here
+   SESSION_SECRET=$(openssl rand -hex 32)
+   FRONTEND_URL=http://localhost:3001
+   PORT=3001
+   ```
+
+2. **Build and run with Docker Compose:**
+   ```bash
+   docker compose up -d --build
+   ```
+   - App will be available at `http://localhost:3001`
+   - Both frontend and backend run in a single container
+
+3. **Custom port:**
+   ```bash
+   APP_PORT=4000 docker compose up -d --build
    ```
    - App will be available at `http://localhost:4000`
-
-3. **With automatic authentication (recommended):**
-   ```bash
-   # Create .env file with your GitHub Personal Access Token
-   echo "REACT_APP_GITHUB_TOKEN=your_github_token_here" > .env
-   
-   # Build and run (token will be embedded in the build)
-   docker compose up -d
-   ```
-   - The app will automatically authenticate using your token
-   - No manual token entry required after logout/login
 
 ### Docker Commands
 
@@ -133,10 +159,13 @@ docker compose up -d --build
 
 ### Docker Architecture
 
-- **Multi-stage build:** Node.js for building, Nginx for serving
-- **Production optimized:** Static files served by Nginx with gzip compression
-- **SPA routing:** Nginx configured for React Router support
-- **Environment variables:** Build-time configuration for GitHub OAuth
+- **Multi-stage build:**
+  - Stage 1: Node.js builds frontend React app
+  - Stage 2: Node.js builds backend Express server
+  - Stage 3: Runtime with Express serving both API and static frontend
+- **Production optimized:** Single Node.js server handles all requests
+- **SPA routing:** Express configured to serve index.html for all routes
+- **Environment variables:** Runtime configuration for GitHub OAuth and sessions
 
 ## 🏗️ Technical Architecture
 
@@ -146,8 +175,15 @@ docker compose up -d --build
 - **Apollo Client** - Efficient GraphQL state management with caching
 - **date-fns** - Lightweight date formatting
 
+### Backend Stack (New!)
+- **Express.js** - Lightweight web server for OAuth and API proxy
+- **express-session** - Secure session management with encrypted cookies
+- **TypeScript** - Type-safe backend development
+
 ### GitHub Integration
+- **GitHub OAuth 2.0** - Industry-standard authentication flow
 - **GitHub GraphQL API v4** - Single, efficient API calls instead of dozens of REST requests
+- **Backend Proxy** - GraphQL requests routed through Express for secure token handling
 - **Comprehensive Data Fetching** - All dashboard data in one GraphQL query
 
 
@@ -173,30 +209,60 @@ npx tsc --noEmit
 
 ### Authentication Issues
 
-**Problem**: App prompts for manual token entry even with `.env` file
-**Solution**: 
-- Ensure your `.env` file uses `REACT_APP_GITHUB_TOKEN` (not `REACT_APP_GITHUB_CLIENT_ID`)
-- For Docker: Rebuild the container after changing `.env`: `docker compose up -d --build`
-- For development: Restart the dev server after changing `.env`
+**Problem**: OAuth redirect fails with "Invalid callback URL"
+**Solution**:
+- Verify the callback URL in your GitHub OAuth App settings matches exactly: `http://localhost:3001/auth/callback`
+- For production, update to your domain: `https://yourdomain.com/auth/callback`
 
-**Problem**: Logout/login still prompts for token
-**Solution**: 
-- Check that `REACT_APP_GITHUB_TOKEN` is correctly set in your `.env` file
-- The token should be a GitHub Personal Access Token, not an OAuth Client ID
+**Problem**: "Unauthorized" error after signing in
+**Solution**:
+- Check that `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` are correctly set in `.env`
+- Verify the backend server is running on the expected port
+- Check browser console and server logs for detailed error messages
 
-### Token Scopes
-Make sure your GitHub Personal Access Token has these scopes:
-- `repo` - Access to repositories
-- `read:user` - Read user profile information  
-- `read:org` - Read organization and team information
-- `read:discussion` - Read discussions
+**Problem**: CORS errors in browser console
+**Solution**:
+- Ensure `FRONTEND_URL` in `.env` matches the URL you're accessing the app from
+- For local dev with separate frontend/backend: `FRONTEND_URL=http://localhost:3000`
+- For production: `FRONTEND_URL=https://yourdomain.com`
+
+**Problem**: Session expires immediately
+**Solution**:
+- Check that `SESSION_SECRET` is set to a long random string (minimum 32 characters)
+- For HTTPS deployments, ensure cookies are marked as secure
+- Verify your browser allows cookies
+
+### Backend Issues
+
+**Problem**: Backend won't start - "GITHUB_CLIENT_ID is required"
+**Solution**:
+- Make sure you've created a `.env` file in the root directory (not in `server/`)
+- The backend reads environment variables from the root `.env` file
+- Run `cp .env.example .env` and fill in your values
+
+**Problem**: GraphQL queries fail with 401 Unauthorized
+**Solution**:
+- The backend proxy may not be forwarding the session correctly
+- Check that `credentials: 'include'` is set in Apollo Client (already configured)
+- Verify you're logged in by checking `/auth/status` endpoint
 
 
-## ⚠️ Security warning about token storage
+## 🔒 Security
 
-- **Where the token is stored**: When you provide a token, this app stores it in the browser under this origin using `localStorage` keys `github_token` and `github_user` (see `src/context/AuthContext.tsx`).
-- **Isolation**: Browser storage is scoped per origin and per browser profile. Other users on other devices/browsers/profiles cannot access your token. Private/incognito windows have separate storage.
-- **Risk (XSS)**: Any JavaScript that runs on this page can read `localStorage`. Avoid injecting untrusted content and keep dependencies up-to-date. Consider a strict Content Security Policy (CSP) for hardened deployments.
-- **Persistence**: Tokens in `localStorage` persist across restarts. If you prefer non-persistent sessions, change the implementation to use `sessionStorage` instead.
+### OAuth Implementation
+- **Secure Token Storage**: Access tokens stored server-side in encrypted session cookies (httpOnly, secure, sameSite)
+- **CSRF Protection**: State parameter validation in OAuth flow prevents cross-site request forgery
+- **No Client-Side Tokens**: Tokens never exposed to browser JavaScript, reducing XSS attack surface
+- **Session Management**: 30-day sessions with secure cookie configuration
+
+### Best Practices for Self-Hosting
+1. **Use HTTPS**: Always run behind HTTPS in production (use reverse proxy like Nginx/Caddy)
+2. **Strong Session Secret**: Generate a cryptographically secure random string for `SESSION_SECRET`
+   ```bash
+   openssl rand -hex 32
+   ```
+3. **Environment Variables**: Never commit `.env` file to version control
+4. **Keep Dependencies Updated**: Regularly run `npm audit` and update packages
+5. **Firewall**: Restrict access to your server if only you need it
 
 

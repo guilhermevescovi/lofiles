@@ -274,10 +274,10 @@ const Dashboard: React.FC = () => {
                   >
                     {user.login}
                   </Typography>
-                  <Avatar 
-                    src={user.avatarUrl} 
-                    alt={user.login} 
-                    sx={{ width: 32, height: 32 }} 
+                  <Avatar
+                    src={user.avatar_url}
+                    alt={user.login}
+                    sx={{ width: 32, height: 32 }}
                   />
                 </Box>
               )}
