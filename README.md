@@ -15,7 +15,7 @@ A single-pane-of-glass dashboard that cuts through the noise of GitHub notificat
 
 ## ✨ Features
 
-### 📥 Triage Widget: What Needs My Immediate Attention?
+### 📥 Review Requests Widget
 - **Smart Review Assignment Grouping:** PRs organized by how they're assigned to you:
   - **🎯 Directly Assigned** - PRs specifically assigned to you (highlighted with high priority styling)
   - **👥 Team Assignments** - PRs assigned to your skill groups (e.g., skill-backend, skill-frontend)
@@ -23,11 +23,11 @@ A single-pane-of-glass dashboard that cuts through the noise of GitHub notificat
 - Shows CI/CD status (passing checks, failing builds)
 - Displays PR title, repository, author, and last updated time
 
-### 🚀 In-Flight Widget: My Active Workstream
+### 🚀 My Stuff Widget
 - **My Open Pull Requests:** All PRs you have authored, grouped by status:
   - `Draft`, `Awaiting Review`, `In Review`, `Approved`
 
-### 👀 On My Radar Widget: Keeping Context *(Key Feature!)*
+### 👀 On My Radar Widget *(Key Feature!)*
 - **PRs I've Reviewed:** Lists PRs you have already approved or commented on
 - **🔥 Highlights new commits since your last review** - this is a major pain point solver!
 - **PRs I've Contributed To:** Shows PRs you've pushed commits to (collaborative work)
@@ -37,6 +37,11 @@ A single-pane-of-glass dashboard that cuts through the noise of GitHub notificat
 - Manually pin 1-5 important issues or PRs for your daily focus
 - Stored in browser localStorage - your personal to-do list
 - Add items via GitHub URL with auto-parsing
+
+### 🔔 Notification Highlights
+- Quick dropdown in the header showing pending review requests and focus items
+- Badge count keeps you aware of new work without leaving the dashboard
+- One-click navigation opens items in new tabs for fast triage
 
 ### 🔔 Notification Highlights
 - Quick dropdown in the header showing pending review requests and focus items
