@@ -15,7 +15,8 @@ import {
   CircularProgress,
   Button,
   FormControlLabel,
-  Switch
+  Switch,
+  Tooltip
 } from '@mui/material';
 import {
   Radar,
@@ -25,7 +26,8 @@ import {
   OpenInNew,
   NewReleases,
   Star,
-  StarBorder
+  StarBorder,
+  Refresh
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { useQuery } from '@apollo/client';
@@ -50,9 +52,21 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
     pollInterval: 300000, // Auto-refresh every 5 minutes
     fetchPolicy: 'cache-and-network'
   });
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const involvedPRs = data?.involvedPRs?.nodes || [];
   const currentUser = data?.viewer?.login || '';
+
+  const isInitialLoading = isLoading && !data;
+
+  const handleRefresh = React.useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refetch]);
   
   // Validate and filter out invalid PRs
   const validPRs = React.useMemo(() => {
@@ -174,11 +188,14 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
   const hasAnyPRs = basePRs.length > 0;
   const hasFilteredPRs = filteredPRs.length > 0;
 
-  // Handle loading state
-  if (isLoading) {
+  const refreshDisabled = isRefreshing || isLoading;
+  const showRefreshSpinner = isRefreshing;
+
+  // Handle initial loading state
+  if (isInitialLoading) {
     return (
       <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Box display="flex" alignItems="center" mb={2}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Typography 
             variant="h6" 
             component="h2"
@@ -192,6 +209,13 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
           >
             On My Radar
           </Typography>
+          <Tooltip title="Reload radar" placement="left">
+            <span>
+              <IconButton size="small" disabled>
+                <Refresh fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
         </Box>
         
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -205,7 +229,7 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
   if (error) {
     return (
       <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Box display="flex" alignItems="center" mb={2}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Typography 
             variant="h6" 
             component="h2"
@@ -219,13 +243,20 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
           >
             On My Radar
           </Typography>
+          <Tooltip title="Reload radar" placement="left">
+            <span>
+              <IconButton size="small" onClick={handleRefresh} disabled={refreshDisabled}>
+                {showRefreshSpinner ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
+              </IconButton>
+            </span>
+          </Tooltip>
         </Box>
         
         <Alert
           severity="error"
           sx={{ mb: 2 }}
           action={
-            <Button color="inherit" size="small" onClick={() => refetch()}>
+            <Button color="inherit" size="small" onClick={handleRefresh} disabled={refreshDisabled}>
               Retry
             </Button>
           }
@@ -238,7 +269,7 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
 
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box display="flex" alignItems="center" mb={2}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
         <Typography 
           variant="h6" 
           component="h2"
@@ -252,6 +283,13 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
         >
           On My Radar
         </Typography>
+        <Tooltip title="Reload radar" placement="left">
+          <span>
+            <IconButton size="small" onClick={handleRefresh} disabled={refreshDisabled}>
+              {(showRefreshSpinner || (isLoading && basePRs.length > 0)) ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
+            </IconButton>
+          </span>
+        </Tooltip>
       </Box>
 
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>

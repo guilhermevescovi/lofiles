@@ -19,7 +19,8 @@ import {
   Alert,
   Button,
   FormControlLabel,
-  Switch
+  Switch,
+  Tooltip
 } from '@mui/material';
 import {
   PriorityHigh,
@@ -29,7 +30,8 @@ import {
   OpenInNew,
   ExpandMore,
   Star,
-  StarBorder
+  StarBorder,
+  Refresh
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { PullRequest } from '../../types/github';
@@ -43,7 +45,8 @@ interface ReviewRequestsWidgetProps {
   prs: PullRequest[];
   loading: boolean;
   errorMessage?: string;
-  onRetry?: () => void;
+  onRefresh?: () => void | Promise<void>;
+  isRefreshing?: boolean;
 }
 
 const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
@@ -52,7 +55,8 @@ const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
   prs,
   loading,
   errorMessage,
-  onRetry
+  onRefresh,
+  isRefreshing
 }) => {
   const { user } = useAuth();
   const { isInFocus, addToFocus, removeFromFocus, getFocusItem } = useFocus();
@@ -61,6 +65,8 @@ const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
   const { themeName } = useThemeMode();
   const isLofiTheme = themeName === 'lofi';
   const prsToReview = prs || [];
+  const refreshDisabled = !onRefresh || (loading && prsToReview.length === 0) || Boolean(isRefreshing);
+  const showRefreshSpinner = Boolean(isRefreshing) || (loading && prsToReview.length > 0);
 
   const filteredPRs = React.useMemo(() => {
     let visible = prsToReview;
@@ -209,33 +215,46 @@ const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
 
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box display="flex" alignItems="center" gap={1} mb={2}>
-        <Typography 
-          variant="h6" 
-          component="h2"
-          sx={{
-            fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
-            fontSize: '18px',
-            textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
-            color: (theme) => theme.palette.text.primary,
-            letterSpacing: '1px'
-          }}
-        >
-          Review Requests
-        </Typography>
-        {isLofiTheme && (
-          <Box 
-            component="img" 
-            src={`${process.env.PUBLIC_URL}/assets/internet-running.gif`} 
-            alt="Internet Running"
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography 
+            variant="h6" 
+            component="h2"
             sx={{
-              height: 'auto',
-              maxHeight: '48px',
-              objectFit: 'contain',
-              borderRadius: '4px'
+              fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
+              fontSize: '18px',
+              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              color: (theme) => theme.palette.text.primary,
+              letterSpacing: '1px'
             }}
-          />
-        )}
+          >
+            Review Requests
+          </Typography>
+          {isLofiTheme && (
+            <Box 
+              component="img" 
+              src={`${process.env.PUBLIC_URL}/assets/internet-running.gif`} 
+              alt="Internet Running"
+              sx={{
+                height: 'auto',
+                maxHeight: '48px',
+                objectFit: 'contain',
+                borderRadius: '4px'
+              }}
+            />
+          )}
+        </Box>
+        <Tooltip title="Reload review requests">
+          <span>
+            <IconButton 
+              size="small"
+              onClick={() => onRefresh?.()}
+              disabled={refreshDisabled}
+            >
+              {showRefreshSpinner ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
+            </IconButton>
+          </span>
+        </Tooltip>
       </Box>
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
         <Typography variant="body2" color="text.secondary">
@@ -278,7 +297,7 @@ const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
           <Alert severity="error" sx={{ width: '100%' }}>
             Failed to load PRs. {errorMessage}
           </Alert>
-          <Button onClick={() => onRetry?.()} variant="contained" size="small">
+          <Button onClick={() => onRefresh?.()} variant="contained" size="small">
             Retry
           </Button>
         </Box>

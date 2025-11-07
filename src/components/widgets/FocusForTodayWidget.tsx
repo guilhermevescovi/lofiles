@@ -16,15 +16,17 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Chip
+  Chip,
+  Tooltip,
+  CircularProgress
 } from '@mui/material';
 import { 
-  Star, 
   Add, 
   Delete, 
   OpenInNew,
   MergeType,
-  Assignment
+  Assignment,
+  Refresh
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { useFocus } from '../../context/FocusContext';
@@ -32,10 +34,11 @@ import { PullRequest } from '../../types/github';
 import { useThemeMode } from '../../context/ThemeContext';
 
 const FocusForTodayWidget: React.FC = () => {
-  const { focusItems, addToFocus, removeFromFocus } = useFocus();
+  const { focusItems, addToFocus, removeFromFocus, reloadFocusItems } = useFocus();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newItemUrl, setNewItemUrl] = useState('');
   const [newItemTitle, setNewItemTitle] = useState('');
+  const [isReloading, setIsReloading] = useState(false);
   const { themeName } = useThemeMode();
   const isLofiTheme = themeName === 'lofi';
 
@@ -99,6 +102,14 @@ const FocusForTodayWidget: React.FC = () => {
     }
   };
 
+  const handleReload = () => {
+    setIsReloading(true);
+    reloadFocusItems();
+    window.setTimeout(() => {
+      setIsReloading(false);
+    }, 300);
+  };
+
   return (
     <>
       <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -116,14 +127,30 @@ const FocusForTodayWidget: React.FC = () => {
           >
             Focus for Today
           </Typography>
-          
-          <IconButton 
-            size="small" 
-            onClick={() => setIsAddDialogOpen(true)}
-            disabled={focusItems.length >= 5}
-          >
-            <Add />
-          </IconButton>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <Tooltip title="Reload focus list">
+              <span>
+                <IconButton 
+                  size="small"
+                  onClick={handleReload}
+                  disabled={isReloading}
+                >
+                  {isReloading ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title={focusItems.length >= 5 ? 'Maximum of 5 items reached' : 'Add focus item'}>
+              <span>
+                <IconButton 
+                  size="small" 
+                  onClick={() => setIsAddDialogOpen(true)}
+                  disabled={focusItems.length >= 5}
+                >
+                  <Add />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
         </Box>
         
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

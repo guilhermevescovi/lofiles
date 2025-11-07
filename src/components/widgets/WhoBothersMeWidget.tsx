@@ -12,11 +12,14 @@ import {
   Box,
   CircularProgress,
   Alert,
-  Button
+  Button,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { PullRequest } from '../../types/github';
 import { useThemeMode } from '../../context/ThemeContext';
+import Refresh from '@mui/icons-material/Refresh';
 
 interface WhoBothersMeWidgetProps {
   selectedAuthor?: string | null;
@@ -25,7 +28,8 @@ interface WhoBothersMeWidgetProps {
   prs: PullRequest[];
   loading: boolean;
   errorMessage?: string;
-  onRetry?: () => void;
+  onRefresh?: () => void | Promise<void>;
+  isRefreshing?: boolean;
 }
 
 interface AuthorReviewCount {
@@ -41,10 +45,13 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
   prs,
   loading,
   errorMessage,
-  onRetry
+  onRefresh,
+  isRefreshing
 }) => {
   const { themeName } = useThemeMode();
   const isLofiTheme = themeName === 'lofi';
+  const showRefreshSpinner = Boolean(isRefreshing) || (loading && prs.length > 0);
+  const refreshDisabled = !onRefresh || Boolean(isRefreshing) || (loading && prs.length === 0);
 
   const pendingByAuthor = React.useMemo<AuthorReviewCount[]>(() => {
     const counts = new Map<string, AuthorReviewCount>();
@@ -100,11 +107,24 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
           >
             Who bothers me
           </Typography>
-          {selectedAuthor && onClearFilter && (
-            <Button onClick={onClearFilter} size="small">
-              Clear
-            </Button>
-          )}
+          <Box display="flex" alignItems="center" gap={0.5}>
+            {selectedAuthor && onClearFilter && (
+              <Button onClick={onClearFilter} size="small">
+                Clear
+              </Button>
+            )}
+            <Tooltip title="Reload summary">
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => onRefresh?.()}
+                  disabled={refreshDisabled}
+                >
+                  {showRefreshSpinner ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
         </Box>
 
         {totalRequests > 0 && (
@@ -129,7 +149,7 @@ const WhoBothersMeWidget: React.FC<WhoBothersMeWidgetProps> = ({
             severity="error"
             sx={{ mb: 1 }}
             action={
-              <Button color="inherit" size="small" onClick={() => onRetry?.()}>
+              <Button color="inherit" size="small" onClick={() => onRefresh?.()}>
                 Retry
               </Button>
             }

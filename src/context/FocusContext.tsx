@@ -7,6 +7,7 @@ interface FocusContextType {
   removeFromFocus: (id: string) => void;
   isInFocus: (prUrl: string) => boolean;
   getFocusItem: (prUrl: string) => FocusItem | undefined;
+  reloadFocusItems: () => void;
 }
 
 const FocusContext = createContext<FocusContextType | undefined>(undefined);
@@ -18,16 +19,24 @@ interface FocusProviderProps {
 export const FocusProvider: React.FC<FocusProviderProps> = ({ children }) => {
   const [focusItems, setFocusItems] = useState<FocusItem[]>([]);
 
+  const loadStoredFocusItems = () => {
+    const stored = localStorage.getItem('github_focus_items');
+    if (!stored) {
+      return [] as FocusItem[];
+    }
+
+    try {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? (parsed as FocusItem[]) : [];
+    } catch (error) {
+      console.error('Error loading focus items:', error);
+      return [] as FocusItem[];
+    }
+  };
+
   // Load focus items from localStorage on component mount
   useEffect(() => {
-    const stored = localStorage.getItem('github_focus_items');
-    if (stored) {
-      try {
-        setFocusItems(JSON.parse(stored));
-      } catch (error) {
-        console.error('Error loading focus items:', error);
-      }
-    }
+    setFocusItems(loadStoredFocusItems());
   }, []);
 
   // Save focus items to localStorage whenever the list changes
@@ -83,13 +92,18 @@ export const FocusProvider: React.FC<FocusProviderProps> = ({ children }) => {
     return focusItems.find(item => item.url === prUrl);
   };
 
+  const reloadFocusItems = () => {
+    setFocusItems(loadStoredFocusItems());
+  };
+
   return (
     <FocusContext.Provider value={{
       focusItems,
       addToFocus,
       removeFromFocus,
       isInFocus,
-      getFocusItem
+      getFocusItem,
+      reloadFocusItems
     }}>
       {children}
     </FocusContext.Provider>

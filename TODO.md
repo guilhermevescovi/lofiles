@@ -1,4 +1,0 @@
-- remove review score widget
-- break the single query into multiple queries, one for each widget
-- make PR links be clickable in a way that allows for open in a new tab with athe midle button of the mouse
-- 

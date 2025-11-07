@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Typography,
   Avatar,
@@ -65,7 +65,17 @@ const Dashboard: React.FC = () => {
     fetchPolicy: 'cache-and-network'
   });
   const prsToReview = (prsData?.prsToReview?.nodes as PullRequest[]) ?? [];
+  const [isManualRefreshingPrs, setIsManualRefreshingPrs] = useState(false);
   const { focusItems } = useFocus();
+
+  const handleRefreshPrs = useCallback(async () => {
+    setIsManualRefreshingPrs(true);
+    try {
+      await refetchPrs();
+    } finally {
+      setIsManualRefreshingPrs(false);
+    }
+  }, [refetchPrs]);
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -81,9 +91,8 @@ const Dashboard: React.FC = () => {
               prs={prsToReview}
               loading={prsLoading}
               errorMessage={prsError?.message}
-              onRetry={() => {
-                void refetchPrs();
-              }}
+              onRefresh={handleRefreshPrs}
+              isRefreshing={isManualRefreshingPrs}
             />
           </Box>
 
@@ -207,13 +216,11 @@ const Dashboard: React.FC = () => {
                       {isLofiTheme ? <GitHub fontSize="small" /> : <GraphicEq fontSize="small" />}
                     </IconButton>
                   </Tooltip>
-                  <NotificationHighlightsDropdown
+              <NotificationHighlightsDropdown
                     reviewRequests={prsToReview}
                     focusItems={focusItems}
-                    loading={prsLoading}
-                    onRefresh={() => {
-                      void refetchPrs();
-                    }}
+                loading={prsLoading || isManualRefreshingPrs}
+                onRefresh={handleRefreshPrs}
                   />
                 </Box>
               </Box>
@@ -286,9 +293,8 @@ const Dashboard: React.FC = () => {
                 prs={prsToReview}
                 loading={prsLoading}
                 errorMessage={prsError?.message}
-                onRetry={() => {
-                  void refetchPrs();
-                }}
+                onRefresh={handleRefreshPrs}
+                isRefreshing={isManualRefreshingPrs}
               />
 
               {isLofiTheme && <LofiPlayer />}

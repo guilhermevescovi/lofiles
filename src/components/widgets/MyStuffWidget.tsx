@@ -15,7 +15,8 @@ import {
   Tab,
   CircularProgress,
   Alert,
-  Button
+  Button,
+  Tooltip
 } from '@mui/material';
 import {
   Assignment,
@@ -26,7 +27,8 @@ import {
   OpenInNew,
   Person,
   Star,
-  StarBorder
+  StarBorder,
+  Refresh
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 import { useQuery } from '@apollo/client';
@@ -50,9 +52,24 @@ const MyStuffWidget: React.FC<MyStuffWidgetProps> = () => {
     pollInterval: 300000, // Auto-refresh every 5 minutes
     fetchPolicy: 'cache-and-network'
   });
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const myOpenPRs = data?.myOpenPRs?.nodes || [];
   const assignedIssues = data?.assignedIssues?.nodes || [];
+  const hasData = myOpenPRs.length > 0 || assignedIssues.length > 0;
+  const isInitialLoading = loading && !hasData;
+
+  const handleRefresh = React.useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refetch]);
+
+  const refreshDisabled = isRefreshing || loading;
+  const showRefreshSpinner = isRefreshing || (loading && hasData);
 
   const getPRStatus = (pr: PullRequest) => {
     if (pr.isDraft) return 'Draft';
@@ -114,10 +131,34 @@ const MyStuffWidget: React.FC<MyStuffWidgetProps> = () => {
     }
   };
 
-  if (loading && myOpenPRs.length === 0 && assignedIssues.length === 0) {
+  if (isInitialLoading) {
     return (
-      <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress />
+      <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+          <Typography
+            variant="h6"
+            component="h2"
+            sx={{
+              fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
+              fontSize: '18px',
+              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              color: (theme) => theme.palette.text.primary,
+              letterSpacing: '1px'
+            }}
+          >
+            My Stuff
+          </Typography>
+          <Tooltip title="Reload my work" placement="left">
+            <span>
+              <IconButton size="small" disabled>
+                <Refresh fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Box>
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
       </Paper>
     );
   }
@@ -128,7 +169,7 @@ const MyStuffWidget: React.FC<MyStuffWidgetProps> = () => {
         <Alert severity="error" sx={{ width: '100%' }}>
           Failed to load your work. {error.message}
         </Alert>
-        <Button onClick={() => refetch()} variant="contained" size="small">
+        <Button onClick={handleRefresh} variant="contained" size="small" disabled={refreshDisabled}>
           Retry
         </Button>
       </Paper>
@@ -137,7 +178,7 @@ const MyStuffWidget: React.FC<MyStuffWidgetProps> = () => {
 
   return (
     <Paper elevation={2} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box display="flex" alignItems="center" mb={2}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
         <Typography
           variant="h6"
           component="h2"
@@ -151,6 +192,13 @@ const MyStuffWidget: React.FC<MyStuffWidgetProps> = () => {
         >
           My Stuff
         </Typography>
+        <Tooltip title="Reload my work" placement="left">
+          <span>
+            <IconButton size="small" onClick={handleRefresh} disabled={refreshDisabled}>
+              {showRefreshSpinner ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
+            </IconButton>
+          </span>
+        </Tooltip>
       </Box>
 
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
