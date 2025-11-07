@@ -45,10 +45,11 @@ app.use(session({
 // Rate limiting configuration
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit each IP to 10 requests per window
+  max: 50, // Limit each IP to 50 requests per window (more reasonable for OAuth flows)
   message: 'Too many authentication attempts, please try again later',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  skip: () => process.env.NODE_ENV === 'development', // Skip rate limiting in development
 });
 
 const apiLimiter = rateLimit({
