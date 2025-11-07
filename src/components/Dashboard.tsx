@@ -13,6 +13,7 @@ import { useQuery } from '@apollo/client';
 import { useAuth } from '../context/AuthContext';
 import { useThemeMode } from '../context/ThemeContext';
 import { useFocus } from '../context/FocusContext';
+import { useBrowserNotifications } from '../hooks/useBrowserNotifications';
 import ReviewRequestsWidget from './widgets/ReviewRequestsWidget';
 import MyStuffWidget from './widgets/MyStuffWidget';
 import OnMyRadarWidget from './widgets/OnMyRadarWidget';
@@ -22,6 +23,7 @@ import WhoBothersMeWidget from './widgets/WhoBothersMeWidget';
 import { GET_PRS_TO_REVIEW } from '../apollo/queries';
 import type { PullRequest } from '../types/github';
 import NotificationHighlightsDropdown from './NotificationHighlightsDropdown';
+import NotificationSettings from './NotificationSettings';
 
 // Glitch keyframes for the Lo-files title
 const glitchMain = keyframes`
@@ -67,6 +69,15 @@ const Dashboard: React.FC = () => {
   const prsToReview = (prsData?.prsToReview?.nodes as PullRequest[]) ?? [];
   const [isManualRefreshingPrs, setIsManualRefreshingPrs] = useState(false);
   const { focusItems } = useFocus();
+
+  // Browser notifications
+  const {
+    requestPermission,
+    getPreferences,
+    setPreferences,
+    isSupported,
+    permission,
+  } = useBrowserNotifications(prsToReview, focusItems);
 
   const handleRefreshPrs = useCallback(async () => {
     setIsManualRefreshingPrs(true);
@@ -216,11 +227,18 @@ const Dashboard: React.FC = () => {
                       {isLofiTheme ? <GitHub fontSize="small" /> : <GraphicEq fontSize="small" />}
                     </IconButton>
                   </Tooltip>
-              <NotificationHighlightsDropdown
+                  <NotificationSettings
+                    getPreferences={getPreferences}
+                    setPreferences={setPreferences}
+                    requestPermission={requestPermission}
+                    permission={permission}
+                    isSupported={isSupported}
+                  />
+                  <NotificationHighlightsDropdown
                     reviewRequests={prsToReview}
                     focusItems={focusItems}
-                loading={prsLoading || isManualRefreshingPrs}
-                onRefresh={handleRefreshPrs}
+                    loading={prsLoading || isManualRefreshingPrs}
+                    onRefresh={handleRefreshPrs}
                   />
                 </Box>
               </Box>

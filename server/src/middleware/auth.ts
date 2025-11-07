@@ -16,11 +16,13 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
  */
 export function securityHeaders(req: Request, res: Response, next: NextFunction): void {
   // Content Security Policy
+  // Note: 'unsafe-inline' for script-src is required for Create React App production builds
+  // Consider implementing a nonce-based CSP for stronger security in the future
   res.setHeader(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' https://*.githubusercontent.com https://avatars.githubusercontent.com data: blob:",
