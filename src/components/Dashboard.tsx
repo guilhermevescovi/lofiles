@@ -23,7 +23,6 @@ import WhoBothersMeWidget from './widgets/WhoBothersMeWidget';
 import { GET_PRS_TO_REVIEW } from '../apollo/queries';
 import type { PullRequest } from '../types/github';
 import NotificationHighlightsDropdown from './NotificationHighlightsDropdown';
-import NotificationSettings from './NotificationSettings';
 
 // Glitch keyframes for the Lo-files title
 const glitchMain = keyframes`
@@ -227,18 +226,16 @@ const Dashboard: React.FC = () => {
                       {isLofiTheme ? <GitHub fontSize="small" /> : <GraphicEq fontSize="small" />}
                     </IconButton>
                   </Tooltip>
-                  <NotificationSettings
-                    getPreferences={getPreferences}
-                    setPreferences={setPreferences}
-                    requestPermission={requestPermission}
-                    permission={permission}
-                    isSupported={isSupported}
-                  />
                   <NotificationHighlightsDropdown
                     reviewRequests={prsToReview}
                     focusItems={focusItems}
                     loading={prsLoading || isManualRefreshingPrs}
                     onRefresh={handleRefreshPrs}
+                    getPreferences={getPreferences}
+                    setPreferences={setPreferences}
+                    requestPermission={requestPermission}
+                    permission={permission}
+                    isSupported={isSupported}
                   />
                 </Box>
               </Box>
