@@ -12,8 +12,19 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
   try {
     const { query, variables } = req.body;
 
-    if (!query) {
-      return res.status(400).json({ error: 'Missing GraphQL query' });
+    // Validate query exists and is a string
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ error: 'Missing or invalid GraphQL query' });
+    }
+
+    // Validate query length to prevent extremely large queries
+    if (query.length > 50000) {
+      return res.status(400).json({ error: 'GraphQL query too large (max 50KB)' });
+    }
+
+    // Validate variables if provided
+    if (variables !== undefined && typeof variables !== 'object') {
+      return res.status(400).json({ error: 'Invalid variables format' });
     }
 
     // Use token from session

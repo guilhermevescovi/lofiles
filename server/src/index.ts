@@ -2,6 +2,7 @@ import express from 'express';
 import session from 'express-session';
 import cors from 'cors';
 import path from 'path';
+import rateLimit from 'express-rate-limit';
 import { config } from './config';
 import { securityHeaders } from './middleware/auth';
 import authRoutes from './routes/auth';
@@ -41,9 +42,26 @@ app.use(session({
   name: 'lofiles.sid', // Custom cookie name
 }));
 
-// API Routes
-app.use('/auth', authRoutes);
-app.use('/graphql', graphqlRoutes);
+// Rate limiting configuration
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 requests per window
+  message: 'Too many authentication attempts, please try again later',
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60, // Limit each IP to 60 requests per minute
+  message: 'Too many API requests, please slow down',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// API Routes with rate limiting
+app.use('/auth', authLimiter, authRoutes);
+app.use('/graphql', apiLimiter, graphqlRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

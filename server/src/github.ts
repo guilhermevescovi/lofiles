@@ -7,9 +7,13 @@ export class GitHubOAuthClient {
    * Generate the GitHub OAuth authorization URL
    */
   getAuthorizationUrl(state: string): string {
+    // Get the base URL from environment or construct from port
+    const baseUrl = process.env.OAUTH_CALLBACK_BASE_URL || `http://localhost:${config.server.port}`;
+    const redirectUri = `${baseUrl}/auth/callback`;
+
     const params = new URLSearchParams({
       client_id: config.github.clientId,
-      redirect_uri: `http://localhost:${config.server.port}/auth/callback`,
+      redirect_uri: redirectUri,
       scope: config.github.scopes.join(' '),
       state,
     });
