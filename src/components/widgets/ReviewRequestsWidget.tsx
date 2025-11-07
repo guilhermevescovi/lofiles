@@ -471,9 +471,10 @@ const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
                           />
                           
                           <Box display="flex" gap={0.5}>
-                            <IconButton 
-                              size="small" 
+                            <IconButton
+                              size="small"
                               onClick={(e) => handleFocusToggle(pr, e)}
+                              onMouseDown={(e) => e.stopPropagation()}
                               color={isInFocus(pr.url) ? "warning" : "default"}
                               title={isInFocus(pr.url) ? "Remove from focus" : "Add to focus"}
                             >
