@@ -34,10 +34,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: config.nodeEnv === 'production', // HTTPS only in production
+    secure: config.nodeEnv === 'production' && !config.server.frontendUrl.includes('localhost'), // HTTPS only in production (but allow HTTP for localhost)
     httpOnly: true,
     maxAge: config.session.maxAge,
-    sameSite: config.nodeEnv === 'production' ? 'strict' : 'lax',
+    sameSite: config.nodeEnv === 'production' ? 'lax' : 'lax', // Use 'lax' for OAuth redirects
   },
   name: 'lofiles.sid', // Custom cookie name
 }));
@@ -75,7 +75,7 @@ app.get('/health', (req, res) => {
 
 // Serve static frontend in production
 if (config.nodeEnv === 'production') {
-  const frontendPath = path.join(__dirname, '../../build');
+  const frontendPath = path.join(__dirname, '../build');
   app.use(express.static(frontendPath));
 
   // SPA fallback - serve index.html for all unmatched routes

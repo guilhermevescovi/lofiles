@@ -7,6 +7,9 @@ WORKDIR /app
 ARG REACT_APP_BACKEND_URL
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 
+# Override homepage for Docker builds (serves from root instead of /lofiles/)
+ENV PUBLIC_URL=/
+
 # Install deps first (better layer caching)
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
