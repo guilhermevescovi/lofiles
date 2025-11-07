@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
           <Box sx={{ display: 'flex', gap: 3, flex: 1, minHeight: 0 }}>
           {/* Column 1: Review Requests - Most Critical */}
-          <Box sx={{ flex: '1 1 300px', minWidth: '300px', height: '100%' }}>
+          <Box sx={{ flex: '1 1 0', minWidth: '320px', height: '100%' }}>
             <ReviewRequestsWidget 
               selectedAuthor={selectedAuthor}
               onClearFilter={() => setSelectedAuthor(null)}
@@ -88,12 +88,12 @@ const Dashboard: React.FC = () => {
           </Box>
 
           {/* Column 2: On My Radar - Context Tracking */}
-          <Box sx={{ flex: '1 1 300px', minWidth: '300px', height: '100%' }}>
+          <Box sx={{ flex: '1 1 0', minWidth: '320px', height: '100%' }}>
             <OnMyRadarWidget />
           </Box>
 
           {/* Column 3: My Stuff and Focus Stack */}
-          <Box sx={{ flex: '1 1 400px', minWidth: '400px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ flex: '1 1 0', minWidth: '340px', height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ height: '60%', mb: 1.5 }}>
               <MyStuffWidget />
             </Box>
