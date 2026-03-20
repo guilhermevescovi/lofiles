@@ -223,7 +223,7 @@ const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
             sx={{
               fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
               fontSize: '18px',
-              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              textShadow: isLofiTheme ? '2px 2px 0px #D4FF3E' : 'none',
               color: (theme) => theme.palette.text.primary,
               letterSpacing: '1px'
             }}
@@ -334,7 +334,7 @@ const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
                   '&:before': { display: 'none' },
                   boxShadow: isDirect ? 3 : 1,
                   borderRadius: '8px !important',
-                  border: isDirect ? '2px solid #4CA1A3' : 'none',
+                  border: isDirect ? '2px solid #D4FF3E' : 'none',
                   backgroundColor: isDirect ? 'rgba(76, 161, 163, 0.15)' : 'background.paper',
                   '&.Mui-expanded': { margin: '0 0 8px 0' }
                 }}
@@ -354,7 +354,7 @@ const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
                       variant="subtitle1" 
                       sx={{ 
                         fontWeight: isDirect ? 700 : 600,
-                        color: isDirect ? '#4CA1A3' : 'text.primary'
+                        color: isDirect ? '#D4FF3E' : 'text.primary'
                       }}
                     >
                       {groupName}
@@ -375,8 +375,8 @@ const ReviewRequestsWidget: React.FC<ReviewRequestsWidgetProps> = ({
                           ml: 1, 
                           fontWeight: 600, 
                           fontSize: '0.6rem',
-                          backgroundColor: '#4CA1A3',
-                          color: '#ffffff'
+                          backgroundColor: '#D4FF3E',
+                          color: '#000000'
                         }}
                       />
                     )}

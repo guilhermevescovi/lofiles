@@ -18,15 +18,15 @@ const lofiTheme = createTheme({
       paper: '#511281',
     },
     primary: {
-      main: '#4CA1A3',
-      contrastText: '#ffffff',
+      main: '#D4FF3E',
+      contrastText: '#21094E',
     },
     secondary: {
       main: '#A5E1AD',
       contrastText: '#21094E',
     },
     info: {
-      main: '#4CA1A3',
+      main: '#D4FF3E',
     },
     success: {
       main: '#A5E1AD',
@@ -69,7 +69,7 @@ const lofiTheme = createTheme({
         root: {
           backgroundImage: 'none',
           borderRadius: 12,
-          border: '1px solid rgba(76, 161, 163, 0.2)',
+          border: '1px solid rgba(212, 255, 62, 0.2)',
         },
       },
     },
@@ -99,7 +99,7 @@ const lofiTheme = createTheme({
         root: {
           color: 'rgba(255, 255, 255, 0.7)',
           '&.Mui-selected': {
-            color: '#4CA1A3',
+            color: '#D4FF3E',
           },
         },
       },
@@ -107,7 +107,7 @@ const lofiTheme = createTheme({
     MuiTabs: {
       styleOverrides: {
         indicator: {
-          backgroundColor: '#4CA1A3',
+          backgroundColor: '#D4FF3E',
         },
       },
     },
@@ -139,15 +139,15 @@ const githubDarkTheme = createTheme({
       paper: '#161b22',
     },
     primary: {
-      main: '#1f6feb',
-      contrastText: '#f0f6fc',
+      main: '#D4FF3E',
+      contrastText: '#0d1117',
     },
     secondary: {
-      main: '#58a6ff',
+      main: '#D4FF3E',
       contrastText: '#0d1117',
     },
     info: {
-      main: '#58a6ff',
+      main: '#D4FF3E',
     },
     success: {
       main: '#3fb950',
@@ -220,7 +220,7 @@ const githubDarkTheme = createTheme({
         root: {
           color: '#8b949e',
           '&.Mui-selected': {
-            color: '#1f6feb',
+            color: '#D4FF3E',
           },
         },
       },
@@ -228,7 +228,7 @@ const githubDarkTheme = createTheme({
     MuiTabs: {
       styleOverrides: {
         indicator: {
-          backgroundColor: '#1f6feb',
+          backgroundColor: '#D4FF3E',
         },
       },
     },
@@ -244,7 +244,7 @@ const githubDarkTheme = createTheme({
       styleOverrides: {
         root: {
           '&:hover': {
-            backgroundColor: 'rgba(31, 111, 235, 0.08)',
+            backgroundColor: 'rgba(212, 255, 62, 0.08)',
           },
         },
       },
@@ -279,7 +279,7 @@ const AppContent: React.FC = () => {
         justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh',
-        color: '#4CA1A3',
+        color: '#D4FF3E',
         fontSize: '18px',
         fontWeight: 500
       }}>

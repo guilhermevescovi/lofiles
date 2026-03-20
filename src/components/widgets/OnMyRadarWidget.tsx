@@ -202,7 +202,7 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
             sx={{
               fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
               fontSize: '18px',
-              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              textShadow: isLofiTheme ? '2px 2px 0px #D4FF3E' : 'none',
               color: (theme) => theme.palette.text.primary,
               letterSpacing: '1px'
             }}
@@ -236,7 +236,7 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
             sx={{
               fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
               fontSize: '18px',
-              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              textShadow: isLofiTheme ? '2px 2px 0px #D4FF3E' : 'none',
               color: (theme) => theme.palette.text.primary,
               letterSpacing: '1px'
             }}
@@ -276,7 +276,7 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
           sx={{
             fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
             fontSize: '18px',
-            textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+            textShadow: isLofiTheme ? '2px 2px 0px #D4FF3E' : 'none',
             color: (theme) => theme.palette.text.primary,
             letterSpacing: '1px'
           }}
@@ -314,9 +314,9 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
           sx={{ 
             mb: 2,
             backgroundColor: 'rgba(76, 161, 163, 0.1)',
-            borderColor: '#4CA1A3',
+            borderColor: '#D4FF3E',
             '& .MuiAlert-icon': {
-              color: '#4CA1A3'
+              color: '#D4FF3E'
             }
           }}
         >
@@ -378,7 +378,7 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
                         </Typography>
                         
                         {hasNewCommits && (
-                          <NewReleases sx={{ color: '#4CA1A3' }} fontSize="small" />
+                          <NewReleases sx={{ color: '#D4FF3E' }} fontSize="small" />
                         )}
                         
                         {pr.isDraft && (
@@ -414,8 +414,8 @@ const OnMyRadarWidget: React.FC<OnMyRadarWidgetProps> = () => {
                               size="small"
                               variant="filled"
                               sx={{
-                                backgroundColor: '#4CA1A3',
-                                color: '#ffffff',
+                                backgroundColor: '#D4FF3E',
+                                color: '#000000',
                                 fontWeight: 600
                               }}
                             />

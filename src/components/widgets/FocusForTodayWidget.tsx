@@ -120,7 +120,7 @@ const FocusForTodayWidget: React.FC = () => {
             sx={{
               fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
               fontSize: '18px',
-              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              textShadow: isLofiTheme ? '2px 2px 0px #D4FF3E' : 'none',
               color: (theme) => theme.palette.text.primary,
               letterSpacing: '1px'
             }}
@@ -237,8 +237,9 @@ const FocusForTodayWidget: React.FC = () => {
                       <OpenInNew fontSize="small" />
                     </IconButton>
                     
-                    <IconButton 
-                      size="small" 
+                    <IconButton
+                      size="small"
+                      onMouseDown={(e) => e.stopPropagation()}
                       onClick={(e) => {
                         e.stopPropagation();
                         removeFromFocus(item.id);

@@ -53,7 +53,7 @@ const Login: React.FC = () => {
     <Container maxWidth="sm" sx={{ mt: 8 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Stack spacing={3} alignItems="center">
-          <GitHub sx={{ fontSize: 60, color: '#4CA1A3' }} />
+          <GitHub sx={{ fontSize: 60, color: '#D4FF3E' }} />
           
           <Typography variant="h4" component="h1" gutterBottom align="center">
             lofiles-dashboard

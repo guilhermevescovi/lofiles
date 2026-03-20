@@ -141,7 +141,7 @@ const MyStuffWidget: React.FC<MyStuffWidgetProps> = () => {
             sx={{
               fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
               fontSize: '18px',
-              textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+              textShadow: isLofiTheme ? '2px 2px 0px #D4FF3E' : 'none',
               color: (theme) => theme.palette.text.primary,
               letterSpacing: '1px'
             }}
@@ -185,7 +185,7 @@ const MyStuffWidget: React.FC<MyStuffWidgetProps> = () => {
           sx={{
             fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
             fontSize: '18px',
-            textShadow: isLofiTheme ? '2px 2px 0px #4CA1A3' : 'none',
+            textShadow: isLofiTheme ? '2px 2px 0px #D4FF3E' : 'none',
             color: (theme) => theme.palette.text.primary,
             letterSpacing: '1px'
           }}

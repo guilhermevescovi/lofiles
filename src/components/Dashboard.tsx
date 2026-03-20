@@ -173,7 +173,7 @@ const Dashboard: React.FC = () => {
                   sx={{ 
                     fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
                     fontSize: '28px',
-                    textShadow: isLofiTheme ? '3px 3px 0px #4CA1A3' : 'none',
+                    textShadow: isLofiTheme ? '3px 3px 0px #D4FF3E' : 'none',
                     color: '#ffffff',
                     letterSpacing: '0.5px',
                     lineHeight: 1.2,
@@ -244,7 +244,7 @@ const Dashboard: React.FC = () => {
               <Box 
                 sx={{ 
                   backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.4), 
-                  border: '1px solid rgba(76, 161, 163, 0.2)',
+                  border: '1px solid rgba(212, 255, 62, 0.2)',
                   borderRadius: '12px',
                   px: 1.5,
                   py: 1,
@@ -266,7 +266,7 @@ const Dashboard: React.FC = () => {
                     sx={{ 
                       fontFamily: isLofiTheme ? '"Press Start 2P", "Courier New", monospace' : undefined,
                       fontSize: '12px',
-                      textShadow: isLofiTheme ? '1px 1px 0px #4CA1A3' : 'none',
+                      textShadow: isLofiTheme ? '1px 1px 0px #D4FF3E' : 'none',
                       color: '#ffffff',
                       letterSpacing: '0.5px',
                       lineHeight: 1.2,
@@ -276,7 +276,7 @@ const Dashboard: React.FC = () => {
                     {user.login}
                   </Typography>
                   <Avatar
-                    src={user.avatar_url}
+                    src={user.avatarUrl}
                     alt={user.login}
                     sx={{ width: 32, height: 32 }}
                   />
@@ -289,7 +289,7 @@ const Dashboard: React.FC = () => {
                 onClick={logout} 
                 title="Logout"
                 sx={{ 
-                  border: '1px solid rgba(76, 161, 163, 0.3)',
+                  border: '1px solid rgba(212, 255, 62, 0.3)',
                   '&:hover': {
                     backgroundColor: 'rgba(76, 161, 163, 0.1)'
                   }
