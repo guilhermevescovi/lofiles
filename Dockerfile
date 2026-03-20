@@ -1,14 +1,13 @@
-# ---- Build Frontend stage ----
-FROM node:18-alpine AS build-frontend
+# ---- Build stage ----
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
 # Accept build arguments for environment variables
-ARG REACT_APP_BACKEND_URL
-ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+ARG REACT_APP_GITHUB_TOKEN
 
-# Override homepage for Docker builds (serves from root instead of /lofiles/)
-ENV PUBLIC_URL=/
+# Set environment variables for the build
+ENV REACT_APP_GITHUB_TOKEN=$REACT_APP_GITHUB_TOKEN
 
 # Install deps first (better layer caching)
 COPY package.json package-lock.json ./
@@ -21,40 +20,19 @@ COPY . .
 RUN npm run build
 
 
-# ---- Build Backend stage ----
-FROM node:18-alpine AS build-backend
-
-WORKDIR /app
-
-# Copy backend package files
-COPY server/package.json server/package-lock.json ./
-RUN npm ci --no-audit --no-fund --production
-
-# Copy backend source
-COPY server/ ./
-
-# Build TypeScript
-RUN npm run build
-
-
 # ---- Runtime stage ----
-FROM node:18-alpine AS runtime
+FROM nginx:stable-alpine AS runtime
 
-WORKDIR /app
+# Copy custom nginx config for SPA
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy backend build and dependencies
-COPY --from=build-backend /app/dist ./dist
-COPY --from=build-backend /app/node_modules ./node_modules
-COPY --from=build-backend /app/package.json ./package.json
+# Copy build artifacts
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy frontend build artifacts
-COPY --from=build-frontend /app/build ./build
+# Expose port
+EXPOSE 80
 
-# Set production environment
-ENV NODE_ENV=production
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
 
-# Expose port (default 3001, can be overridden)
-EXPOSE 3001
 
-# Start Express server (serves both API and static frontend)
-CMD ["node", "dist/index.js"]

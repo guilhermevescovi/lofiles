@@ -1,18 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+import { apolloClient } from '../apollo/client';
+import { GET_CURRENT_USER } from '../apollo/queries';
 
 interface User {
   login: string;
-  avatar_url: string;
+  avatarUrl: string;
   name: string;
-  email: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: () => void;
   logout: () => void;
+  setUserAndToken: (user: User, token: string) => void;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -25,60 +26,90 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkAuthStatus = async () => {
+  const fetchUserData = async (token: string) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/auth/status`, {
-        credentials: 'include', // Important: send cookies
+      const result = await apolloClient.query({
+        query: GET_CURRENT_USER,
+        context: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.authenticated && data.user) {
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
+      
+      const userData = {
+        login: result.data.viewer.login,
+        name: result.data.viewer.name || result.data.viewer.login,
+        avatarUrl: result.data.viewer.avatarUrl,
+      };
+      
+      setUser(userData);
+      setToken(token);
+      localStorage.setItem('github_token', token);
+      localStorage.setItem('github_user', JSON.stringify(userData));
     } catch (error) {
-      console.error('Failed to check auth status:', error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to fetch user data:', error);
+      localStorage.removeItem('github_token');
+      localStorage.removeItem('github_user');
     }
   };
 
   useEffect(() => {
-    checkAuthStatus();
+    const initAuth = async () => {
+      // Check if user is already logged in (token stored in localStorage)
+      const storedToken = localStorage.getItem('github_token');
+      const storedUser = localStorage.getItem('github_user');
+      
+      if (storedToken) {
+        if (storedUser) {
+          try {
+            setToken(storedToken);
+            setUser(JSON.parse(storedUser));
+          } catch (error) {
+            console.error('Error parsing stored user data:', error);
+            // If stored user data is corrupted, fetch fresh data
+            await fetchUserData(storedToken);
+          }
+        } else {
+          // We have a token but no user data, fetch it
+          await fetchUserData(storedToken);
+        }
+      }
+      setIsLoading(false);
+    };
+    
+    initAuth();
   }, []);
 
   const login = () => {
-    // Redirect to backend OAuth endpoint
-    window.location.href = `${BACKEND_URL}/auth/github`;
+    // This will be handled by redirecting to GitHub OAuth
+    window.location.href = '/auth/github';
   };
 
-  const logout = async () => {
-    try {
-      await fetch(`${BACKEND_URL}/auth/logout`, {
-        method: 'POST',
-        credentials: 'include', // Important: send cookies
-      });
-      setUser(null);
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // Clear user state anyway
-      setUser(null);
-    }
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('github_token');
+    localStorage.removeItem('github_user');
+  };
+
+  const setUserAndToken = (newUser: User, newToken: string) => {
+    setUser(newUser);
+    setToken(newToken);
+    localStorage.setItem('github_token', newToken);
+    localStorage.setItem('github_user', JSON.stringify(newUser));
   };
 
   const value: AuthContextType = {
     user,
+    token,
     login,
     logout,
-    isAuthenticated: !!user,
+    setUserAndToken,
+    isAuthenticated: !!user && !!token,
     isLoading
   };
 
