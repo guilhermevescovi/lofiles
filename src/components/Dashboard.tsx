@@ -18,7 +18,6 @@ import ReviewRequestsWidget from './widgets/ReviewRequestsWidget';
 import MyStuffWidget from './widgets/MyStuffWidget';
 import OnMyRadarWidget from './widgets/OnMyRadarWidget';
 import FocusForTodayWidget from './widgets/FocusForTodayWidget';
-import LofiPlayer from './LofiPlayer';
 import WhoBothersMeWidget from './widgets/WhoBothersMeWidget';
 import { GET_PRS_TO_REVIEW } from '../apollo/queries';
 import type { PullRequest } from '../types/github';
@@ -312,7 +311,6 @@ const Dashboard: React.FC = () => {
                 isRefreshing={isManualRefreshingPrs}
               />
 
-              {isLofiTheme && <LofiPlayer />}
             </Box>
           </Box>
           </Box>
